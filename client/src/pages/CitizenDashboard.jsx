@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import { useAuth, API_BASE_URL } from '../context/AuthContext.jsx';
+import { useTheme } from '../context/ThemeContext.jsx';
 import { 
   Plus, 
   MapPin, 
@@ -28,6 +29,7 @@ import bannerBg from '../assets/citizen_banner_bg.png';
 
 const CitizenDashboard = () => {
   const { user, token } = useAuth();
+  const { darkMode } = useTheme();
   const navigate = useNavigate();
   const [issues, setIssues] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
@@ -168,12 +170,24 @@ const CitizenDashboard = () => {
     <div className="space-y-6">
       {/* Top Banner greeting */}
       <div 
-        className="rounded-3xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 bg-cover bg-center text-slate-800 border border-gray-150/40 relative overflow-hidden shadow-sm"
-        style={{ backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.95) 55%, rgba(255, 255, 255, 0.35)), url(${bannerBg})` }}
+        className={`rounded-3xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 relative overflow-hidden shadow-sm border ${
+          darkMode 
+            ? 'bg-slate-905 border-slate-800/80 text-white' 
+            : 'bg-cover bg-center text-slate-800 border-gray-150/40'
+        }`}
+        style={
+          darkMode 
+            ? {} 
+            : { backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.95) 55%, rgba(255, 255, 255, 0.35)), url(${bannerBg})` }
+        }
       >
         <div className="z-10">
-          <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">Good Morning, {user?.name?.split(' ')[0]}! 👋</h2>
-          <p className="text-sm text-slate-500 font-medium mt-1">Let's make our community a better place today.</p>
+          <h2 className={`text-3xl font-extrabold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+            Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}, {user?.name?.split(' ')[0]}! 👋
+          </h2>
+          <p className={`text-sm font-medium mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            {darkMode ? 'Together we can build a better and smarter community.' : "Let's make our community a better place today."}
+          </p>
         </div>
         <div className="flex gap-3 z-10 shrink-0">
           <Link to="/report" className="flex items-center gap-1.5 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-600/20 transition-all hover:scale-102 active:scale-98 cursor-pointer">
