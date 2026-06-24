@@ -25,6 +25,7 @@ import {
   Trophy,
   Leaf
 } from 'lucide-react';
+import bannerBg from '../assets/citizen_banner_bg.png';
 
 const CitizenDashboard = () => {
   const { user, token } = useAuth();
@@ -129,32 +130,18 @@ const CitizenDashboard = () => {
     }
   };
 
-  const getPriorityNumber = (priority) => {
-    switch (priority) {
-      case 'Critical': return '12';
-      case 'High': return '5';
-      case 'Medium': return '7';
-      case 'Low': return '3';
-      default: return '✓';
-    }
-  };
-
-  const createCustomMarker = (priority, status) => {
-    const isResolved = status === 'Resolved';
-    const color = isResolved ? '#10b981' : getPriorityColor(priority);
-    const displayVal = isResolved ? '✓' : getPriorityNumber(priority);
+  const createCustomMarker = (priority) => {
+    const color = getPriorityColor(priority);
     return L.divIcon({
       className: 'custom-div-icon',
       html: `
-        <div class="relative flex items-center justify-center animate-fade-in">
-          <div style="background-color: ${color}" class="absolute h-8 w-8 rounded-full opacity-25 animate-ping"></div>
-          <div style="background-color: ${color}; border: 2.5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.35)" class="h-7 w-7 rounded-full relative z-10 flex items-center justify-center text-[10px] font-black text-white font-sans">
-            ${displayVal}
-          </div>
+        <div class="relative flex items-center justify-center">
+          <div style="background-color: ${color}" class="absolute h-6 w-6 rounded-full opacity-20 animate-ping"></div>
+          <div style="background-color: ${color}; border: 2.5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.25)" class="h-4.5 w-4.5 rounded-full relative z-10"></div>
         </div>
       `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 16]
+      iconSize: [24, 24],
+      iconAnchor: [12, 12]
     });
   };
 
@@ -173,153 +160,176 @@ const CitizenDashboard = () => {
 
   // Badges lists
   const badgeList = [
-    { id: 1, name: 'Community Reporter', color: 'from-emerald-600/20 to-emerald-500/10 text-emerald-450 border border-emerald-500/20', icon: AlertTriangle, active: points >= 0 },
-    { id: 2, name: 'Problem Solver', color: 'from-blue-600/20 to-blue-500/10 text-blue-400 border border-blue-500/20', icon: CheckCircle, active: points >= 50 },
-    { id: 3, name: 'Active Citizen', color: 'from-purple-600/20 to-purple-500/10 text-purple-400 border border-purple-500/20', icon: UserCheck, active: points >= 100 },
-    { id: 4, name: 'Top Contributor', color: 'from-amber-600/20 to-amber-500/10 text-amber-500 border border-amber-500/20', icon: Award, active: points >= 200 }
+    { id: 1, name: 'Community Reporter', desc: 'Report 1st Issue', color: 'from-amber-400 to-yellow-600', icon: AlertTriangle, active: points >= 10 },
+    { id: 2, name: 'Problem Solver', desc: 'Reach 50 Points', color: 'from-emerald-400 to-green-600', icon: CheckCircle, active: points >= 50 },
+    { id: 3, name: 'Active Citizen', desc: 'Reach 100 Points', color: 'from-cyan-400 to-blue-600', icon: UserCheck, active: points >= 100 },
+    { id: 4, name: 'Top Contributor', desc: 'Reach 200 Points', color: 'from-purple-400 to-indigo-600', icon: Award, active: points >= 200 }
   ];
 
   return (
     <div className="space-y-6">
-      {/* Top right floating buttons row */}
-      <div className="flex justify-end gap-3 -mt-2">
-        <Link to="/report" className="flex items-center gap-1.5 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-xl transition-all hover:scale-102 active:scale-98 cursor-pointer shadow-md shadow-emerald-650/15">
-          <Plus size={15} />
-          Report New Issue
-        </Link>
-        <Link to="/nearby-issues" className="flex items-center gap-1.5 px-5 py-2.5 bg-white dark:bg-dark-card text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800/40 border border-gray-250/60 dark:border-dark-border font-extrabold text-xs rounded-xl transition-all hover:scale-102 active:scale-98 cursor-pointer shadow-sm">
-          <MapPin size={15} className="text-emerald-500" />
-          Nearby Issues
-        </Link>
+      {/* Top Banner greeting */}
+      <div 
+        className={`rounded-3xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 relative overflow-hidden shadow-sm border ${
+          darkMode 
+            ? 'bg-slate-905 border-slate-800/80 text-white' 
+            : 'bg-cover bg-center text-slate-800 border-gray-150/40'
+        }`}
+        style={
+          darkMode 
+            ? {} 
+            : { backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.95) 55%, rgba(255, 255, 255, 0.35)), url(${bannerBg})` }
+        }
+      >
+        <div className="z-10">
+          <h2 className={`text-3xl font-extrabold tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+            Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}, {user?.name?.split(' ')[0]}! 👋
+          </h2>
+          <p className={`text-sm font-medium mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            {darkMode ? 'Together we can build a better and smarter community.' : "Let's make our community a better place today."}
+          </p>
+        </div>
+        <div className="flex gap-3 z-10 shrink-0">
+          <Link to="/report" className="flex items-center gap-1.5 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-600/20 transition-all hover:scale-102 active:scale-98 cursor-pointer">
+            <Plus size={16} />
+            Report New Issue
+          </Link>
+          <Link to="/nearby-issues" className="flex items-center gap-1.5 px-5 py-3 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 border border-gray-250/60 dark:border-slate-800 font-extrabold text-xs rounded-2xl shadow-sm transition-all hover:scale-102 active:scale-98 cursor-pointer">
+            <MapPin size={16} className="text-emerald-500" />
+            View Nearby Issues
+          </Link>
+        </div>
       </div>
 
       {/* Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Metric 1: Reported */}
-        <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-2xl p-4.5 flex items-center gap-4 shadow-sm relative overflow-hidden transition-all duration-200">
-          <div className="h-12 w-12 rounded-full bg-emerald-50 dark:bg-[#0c231a] text-emerald-600 dark:text-[#10b981] flex items-center justify-center shrink-0">
-            <FileText size={20} />
+        <div className="glass rounded-2xl p-5 border-l-4 border-emerald-500 shadow-sm relative overflow-hidden">
+          <div className="flex justify-between items-start">
+            <div>
+              <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Issues Reported</span>
+              <span className="block text-3xl font-black text-gray-900 dark:text-white mt-1.5 font-sans">{reportedCount}</span>
+            </div>
+            <div className="p-2 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-xl">
+              <FileText size={18} />
+            </div>
           </div>
-          <div className="min-w-0">
-            <span className="block text-[9px] font-black text-gray-400 dark:text-dark-text-muted uppercase tracking-widest leading-none">Issues Reported</span>
-            <span className="block text-2xl font-black text-gray-900 dark:text-white mt-1.5 font-sans leading-none">{reportedCount}</span>
-            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-450 mt-1.5 block leading-none">
-              ↑ {reportsThisWeek} this week
-            </span>
-          </div>
+          <span className="text-[10px] font-bold text-emerald-600 mt-2 block">+{reportsThisWeek} this week</span>
         </div>
 
         {/* Metric 2: Resolved */}
-        <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-2xl p-4.5 flex items-center gap-4 shadow-sm relative overflow-hidden transition-all duration-200">
-          <div className="h-12 w-12 rounded-full bg-blue-50 dark:bg-[#0c1a2f] text-blue-600 dark:text-[#3b82f6] flex items-center justify-center shrink-0">
-            <CheckCircle size={20} />
+        <div className="glass rounded-2xl p-5 border-l-4 border-blue-500 shadow-sm relative overflow-hidden">
+          <div className="flex justify-between items-start">
+            <div>
+              <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Issues Resolved</span>
+              <span className="block text-3xl font-black text-gray-900 dark:text-white mt-1.5 font-sans">{resolvedCount}</span>
+            </div>
+            <div className="p-2 bg-blue-50 dark:bg-blue-950/20 text-blue-600 rounded-xl">
+              <CheckCircle size={18} />
+            </div>
           </div>
-          <div className="min-w-0">
-            <span className="block text-[9px] font-black text-gray-400 dark:text-dark-text-muted uppercase tracking-widest leading-none">Issues Resolved</span>
-            <span className="block text-2xl font-black text-gray-900 dark:text-white mt-1.5 font-sans leading-none">{resolvedCount}</span>
-            <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 mt-1.5 block leading-none">
-              ↑ {resolvedThisWeek} this week
-            </span>
-          </div>
+          <span className="text-[10px] font-bold text-blue-650 mt-2 block">+{resolvedThisWeek} this week</span>
         </div>
 
         {/* Metric 3: Points */}
-        <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-2xl p-4.5 flex items-center gap-4 shadow-sm relative overflow-hidden transition-all duration-200">
-          <div className="h-12 w-12 rounded-full bg-amber-50 dark:bg-[#1a140c] text-amber-550 dark:text-[#eab308] flex items-center justify-center shrink-0">
-            <Award size={20} />
+        <div className="glass rounded-2xl p-5 border-l-4 border-amber-500 shadow-sm relative overflow-hidden">
+          <div className="flex justify-between items-start">
+            <div>
+              <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Points Earned</span>
+              <span className="block text-3xl font-black text-gray-900 dark:text-white mt-1.5 font-sans">{points}</span>
+            </div>
+            <div className="p-2 bg-amber-50 dark:bg-amber-950/20 text-amber-550 rounded-xl">
+              <Award size={18} />
+            </div>
           </div>
-          <div className="min-w-0">
-            <span className="block text-[9px] font-black text-gray-400 dark:text-dark-text-muted uppercase tracking-widest leading-none">Points Earned</span>
-            <span className="block text-2xl font-black text-gray-900 dark:text-white mt-1.5 font-sans leading-none">{points}</span>
-            <span className="text-[10px] font-bold text-amber-600 dark:text-amber-500 mt-1.5 block leading-none">
-              ↑ {pointsThisWeek} this week
-            </span>
-          </div>
+          <span className="text-[10px] font-bold text-amber-600 mt-2 block">+{pointsThisWeek} this week</span>
         </div>
 
         {/* Metric 4: Rank */}
-        <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-2xl p-4.5 flex items-center gap-4 shadow-sm relative overflow-hidden transition-all duration-200">
-          <div className="h-12 w-12 rounded-full bg-purple-50 dark:bg-[#150f2e] text-purple-605 dark:text-[#a855f7] flex items-center justify-center shrink-0">
-            <Trophy size={20} />
+        <div className="glass rounded-2xl p-5 border-l-4 border-purple-500 shadow-sm relative overflow-hidden">
+          <div className="flex justify-between items-start">
+            <div>
+              <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Current Rank</span>
+              <span className="block text-3xl font-black text-gray-900 dark:text-white mt-1.5 font-sans">
+                {rank > 0 ? `#${rank}` : 'N/A'}
+              </span>
+            </div>
+            <div className="p-2 bg-purple-50 dark:bg-purple-950/20 text-purple-605 rounded-xl">
+              <Trophy size={18} />
+            </div>
           </div>
-          <div className="min-w-0">
-            <span className="block text-[9px] font-black text-gray-400 dark:text-dark-text-muted uppercase tracking-widest leading-none">Current Rank</span>
-            <span className="block text-2xl font-black text-gray-900 dark:text-white mt-1.5 font-sans leading-none">
-              {rank > 0 ? `#${rank}` : 'N/A'}
-            </span>
-            <span className="text-[10px] font-bold text-purple-600 dark:text-purple-400 mt-1.5 block leading-none">
-              {rank > 0 ? `Top ${rankPercentile}%` : 'Unranked'}
-            </span>
-          </div>
+          <span className="text-[10px] font-bold text-purple-600 mt-2 block">
+            {rank > 0 ? `Top ${rankPercentile}%` : 'Unranked'}
+          </span>
         </div>
 
         {/* Metric 5: Impact Score */}
-        <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-2xl p-4.5 flex items-center gap-4 shadow-sm relative overflow-hidden col-span-2 lg:col-span-1 transition-all duration-200">
-          <div className="h-12 w-12 rounded-full bg-rose-50 dark:bg-[#2e0f19] text-rose-600 dark:text-[#f43f5e] flex items-center justify-center shrink-0">
-            <Activity size={20} />
+        <div className="glass rounded-2xl p-5 border-l-4 border-rose-500 shadow-sm relative overflow-hidden col-span-2 lg:col-span-1">
+          <div className="flex justify-between items-start">
+            <div>
+              <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Impact Score</span>
+              <span className="block text-3xl font-black text-gray-900 dark:text-white mt-1.5 font-sans">{impactScore}</span>
+            </div>
+            <div className="p-2 bg-rose-50 dark:bg-rose-950/20 text-rose-600 rounded-xl">
+              <Activity size={18} />
+            </div>
           </div>
-          <div className="min-w-0">
-            <span className="block text-[9px] font-black text-gray-400 dark:text-dark-text-muted uppercase tracking-widest leading-none">Impact Score</span>
-            <span className="block text-2xl font-black text-gray-900 dark:text-white mt-1.5 font-sans leading-none">{impactScore}</span>
-            <span className="text-[10px] font-bold text-rose-600 dark:text-rose-455 mt-1.5 block leading-none">
-              {impactLevel}
-            </span>
-          </div>
+          <span className="text-[10px] font-bold text-rose-600 mt-2 block">{impactLevel}</span>
         </div>
       </div>
 
       {/* Quick Actions Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link to="/report" className="bg-white dark:bg-dark-card hover:bg-gray-50/50 dark:hover:bg-slate-800/10 p-4 rounded-2xl flex items-center justify-between shadow-sm border border-gray-150/40 dark:border-dark-border cursor-pointer transition-all">
+        <Link to="/report" className="glass hover:bg-gray-50/50 dark:hover:bg-slate-800/20 p-4 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer transition-all border border-gray-150/40">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-emerald-50 dark:bg-[#0c231a] text-emerald-600 dark:text-[#10b981] rounded-xl flex items-center justify-center shrink-0">
+            <div className="p-2.5 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-xl">
               <Plus size={16} />
             </div>
             <div>
               <span className="block font-bold text-xs text-gray-900 dark:text-white">Report New Issue</span>
-              <span className="block text-[9px] text-gray-400 dark:text-dark-text-muted mt-0.5">Click to report</span>
+              <span className="block text-[10px] text-gray-400 mt-0.5">Click to report</span>
             </div>
           </div>
-          <ArrowRight size={14} className="text-gray-400 dark:text-dark-text-muted" />
+          <ArrowRight size={14} className="text-gray-400" />
         </Link>
 
-        <Link to="/nearby-issues" className="bg-white dark:bg-dark-card hover:bg-gray-50/50 dark:hover:bg-slate-800/10 p-4 rounded-2xl flex items-center justify-between shadow-sm border border-gray-150/40 dark:border-dark-border cursor-pointer transition-all">
+        <Link to="/nearby-issues" className="glass hover:bg-gray-50/50 dark:hover:bg-slate-800/20 p-4 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer transition-all border border-gray-150/40">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-50 dark:bg-[#0c1a2f] text-blue-600 dark:text-[#3b82f6] rounded-xl flex items-center justify-center shrink-0">
+            <div className="p-2.5 bg-blue-50 dark:bg-blue-950/20 text-blue-600 rounded-xl">
               <MapPin size={16} />
             </div>
             <div>
               <span className="block font-bold text-xs text-gray-900 dark:text-white">Nearby Issues</span>
-              <span className="block text-[9px] text-gray-400 dark:text-dark-text-muted mt-0.5">See issues near you</span>
+              <span className="block text-[10px] text-gray-400 mt-0.5">See issues near you</span>
             </div>
           </div>
-          <ArrowRight size={14} className="text-gray-400 dark:text-dark-text-muted" />
+          <ArrowRight size={14} className="text-gray-400" />
         </Link>
 
-        <Link to="/my-issues" className="bg-white dark:bg-dark-card hover:bg-gray-50/50 dark:hover:bg-slate-800/10 p-4 rounded-2xl flex items-center justify-between shadow-sm border border-gray-150/40 dark:border-dark-border cursor-pointer transition-all">
+        <Link to="/my-issues" className="glass hover:bg-gray-50/50 dark:hover:bg-slate-800/20 p-4 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer transition-all border border-gray-150/40">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-amber-50 dark:bg-[#1a140c] text-amber-600 dark:text-[#eab308] rounded-xl flex items-center justify-center shrink-0">
+            <div className="p-2.5 bg-amber-50 dark:bg-amber-950/20 text-amber-600 rounded-xl">
               <FileText size={16} />
             </div>
             <div>
               <span className="block font-bold text-xs text-gray-900 dark:text-white">Track My Issues</span>
-              <span className="block text-[9px] text-gray-400 dark:text-dark-text-muted mt-0.5">Check issue status</span>
+              <span className="block text-[10px] text-gray-400 mt-0.5">Check issue status</span>
             </div>
           </div>
-          <ArrowRight size={14} className="text-gray-400 dark:text-dark-text-muted" />
+          <ArrowRight size={14} className="text-gray-400" />
         </Link>
 
-        <Link to="/feed" className="bg-white dark:bg-dark-card hover:bg-gray-50/50 dark:hover:bg-slate-800/10 p-4 rounded-2xl flex items-center justify-between shadow-sm border border-gray-150/40 dark:border-dark-border cursor-pointer transition-all">
+        <Link to="/feed" className="glass hover:bg-gray-50/50 dark:hover:bg-slate-800/20 p-4 rounded-2xl flex items-center justify-between shadow-sm cursor-pointer transition-all border border-gray-150/40">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-purple-50 dark:bg-[#150f2e] text-purple-600 dark:text-[#a855f7] rounded-xl flex items-center justify-center shrink-0">
+            <div className="p-2.5 bg-purple-50 dark:bg-purple-950/20 text-purple-600 rounded-xl">
               <Users size={16} />
             </div>
             <div>
               <span className="block font-bold text-xs text-gray-900 dark:text-white">Community Feed</span>
-              <span className="block text-[9px] text-gray-400 dark:text-dark-text-muted mt-0.5">Latest updates</span>
+              <span className="block text-[10px] text-gray-400 mt-0.5">Latest updates</span>
             </div>
           </div>
-          <ArrowRight size={14} className="text-gray-400 dark:text-dark-text-muted" />
+          <ArrowRight size={14} className="text-gray-400" />
         </Link>
       </div>
 
@@ -329,23 +339,23 @@ const CitizenDashboard = () => {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Section 1: My Recent Issues */}
-          <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-3xl p-6 shadow-sm flex flex-col justify-between">
+          <div className="glass rounded-3xl p-6 shadow-sm border border-gray-150/40 flex flex-col justify-between">
             <div>
               <div className="flex justify-between items-center mb-5">
-                <h3 className="font-extrabold text-xs text-gray-950 dark:text-white uppercase tracking-wider">My Recent Issues</h3>
-                <Link to="/my-issues" className="text-xs text-emerald-650 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1">
+                <h3 className="font-extrabold text-xs text-gray-900 dark:text-white uppercase tracking-wider">My Recent Issues</h3>
+                <Link to="/my-issues" className="text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1">
                   View All <ArrowRight size={14} />
                 </Link>
               </div>
 
               {loading ? (
-                <div className="p-8 text-center text-xs text-gray-450 animate-pulse">Loading recent issues...</div>
+                <div className="p-8 text-center text-xs text-gray-400 animate-pulse">Loading recent issues...</div>
               ) : myIssues.length === 0 ? (
-                <div className="p-12 text-center text-xs text-gray-400 dark:text-dark-text-muted font-bold">
+                <div className="p-12 text-center text-xs text-gray-400 dark:text-slate-500 font-medium">
                   You haven't reported any issues yet. Click "Report New Issue" above to start!
                 </div>
               ) : (
-                <div className="divide-y divide-gray-100 dark:divide-dark-border/40">
+                <div className="divide-y divide-gray-100 dark:divide-slate-800/60">
                   {myIssues.slice(0, 4).map((issue) => (
                     <div 
                       key={issue._id} 
@@ -353,7 +363,7 @@ const CitizenDashboard = () => {
                       className="py-3 flex items-center justify-between gap-4 cursor-pointer hover:bg-gray-50/20 dark:hover:bg-slate-800/10 px-2 rounded-xl transition-all"
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className="h-12 w-12 rounded-xl bg-gray-50 dark:bg-dark-bg border border-gray-150 dark:border-dark-border flex items-center justify-center text-xl shrink-0 overflow-hidden shadow-inner">
+                        <div className="h-12 w-12 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-150 dark:border-slate-700 flex items-center justify-center text-xl shrink-0 overflow-hidden shadow-inner">
                           {issue.media?.imageUrl ? (
                             <img src={`${API_BASE_URL.replace('/api', '')}${issue.media.imageUrl}`} alt={issue.title} className="h-full w-full object-cover" />
                           ) : (
@@ -366,14 +376,14 @@ const CitizenDashboard = () => {
                         <div className="min-w-0">
                           <span className="block font-bold text-xs text-gray-900 dark:text-white truncate">{issue.title}</span>
                           <span className="block text-[10px] text-gray-450 mt-0.5 truncate">{issue.location?.address}</span>
-                          <span className="inline-block text-[8px] font-bold text-slate-400 dark:text-dark-text-muted mt-1 uppercase tracking-widest">{issue.priority} Priority</span>
+                          <span className="inline-block text-[8px] font-bold text-slate-400 dark:text-slate-500 mt-1 uppercase tracking-widest">{issue.priority} Priority</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wide ${statusColors[issue.status]}`}>
                           {issue.status}
                         </span>
-                        <span className="text-[9px] text-gray-400 dark:text-dark-text-muted font-semibold hidden sm:inline">
+                        <span className="text-[9px] text-gray-400 font-medium hidden sm:inline">
                           {new Date(issue.createdAt).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                         </span>
                       </div>
@@ -385,15 +395,15 @@ const CitizenDashboard = () => {
           </div>
 
           {/* Section 2: Nearby Issues Map */}
-          <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-3xl p-6 shadow-sm space-y-4">
+          <div className="glass rounded-3xl p-6 shadow-sm border border-gray-150/40 space-y-4">
             <div className="flex justify-between items-center">
-              <h3 className="font-extrabold text-xs text-gray-905 dark:text-white uppercase tracking-wider">Nearby Issues Map</h3>
-              <Link to="/nearby-issues" className="text-xs text-emerald-650 dark:text-emerald-405 font-bold hover:underline flex items-center gap-1">
+              <h3 className="font-extrabold text-xs text-gray-900 dark:text-white uppercase tracking-wider">Nearby Issues Map</h3>
+              <Link to="/nearby-issues" className="text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline flex items-center gap-1">
                 View on Map
               </Link>
             </div>
             
-            <div className="h-72 rounded-2xl overflow-hidden border border-gray-150 dark:border-dark-border shadow-inner z-0 relative">
+            <div className="h-72 rounded-2xl overflow-hidden border border-gray-150 dark:border-slate-800 shadow-inner z-0 relative">
               <MapContainer center={mapCenter} zoom={14} key={`${mapCenter[0]}-${mapCenter[1]}`} className="h-full w-full">
                 <TileLayer
                   attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -408,7 +418,7 @@ const CitizenDashboard = () => {
                     <Marker 
                       key={issue._id} 
                       position={[issue.location.latitude, issue.location.longitude]} 
-                      icon={createCustomMarker(issue.priority, issue.status)}
+                      icon={createCustomMarker(issue.priority)}
                     >
                       <Popup>
                         <div className="p-1 font-sans space-y-1 w-44 text-xs">
@@ -434,12 +444,11 @@ const CitizenDashboard = () => {
             </div>
 
             {/* Map Legend */}
-            <div className="flex items-center justify-center flex-wrap gap-4 text-[10px] font-extrabold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest pt-2">
+            <div className="flex items-center justify-center flex-wrap gap-4 text-[10px] font-extrabold text-gray-400 uppercase tracking-widest pt-2">
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-red-500 inline-block shadow-sm shadow-red-500/20" /> Critical</span>
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-orange-500 inline-block shadow-sm shadow-orange-500/20" /> High</span>
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-yellow-500 inline-block shadow-sm shadow-yellow-500/20" /> Medium</span>
               <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-green-500 inline-block shadow-sm shadow-green-500/20" /> Low</span>
-              <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500 inline-block shadow-sm shadow-emerald-500/20" /> Resolved</span>
             </div>
           </div>
         </div>
@@ -448,19 +457,19 @@ const CitizenDashboard = () => {
         <div className="space-y-6">
           
           {/* Section 1: Live Community Feed (Actual active updates) */}
-          <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-3xl p-6 shadow-sm">
+          <div className="glass rounded-3xl p-6 shadow-sm border border-gray-150/40">
             <div className="flex justify-between items-center mb-5">
               <h3 className="font-extrabold text-xs text-gray-900 dark:text-white uppercase tracking-wider">Community Feed</h3>
-              <Link to="/feed" className="text-xs text-emerald-650 dark:text-emerald-400 font-bold hover:underline">
+              <Link to="/feed" className="text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
                 View Full Feed
               </Link>
             </div>
             
             <div className="space-y-4">
               {loading ? (
-                <div className="p-4 text-center text-xs text-gray-450 animate-pulse">Loading feed...</div>
+                <div className="p-4 text-center text-xs text-gray-400 animate-pulse">Loading feed...</div>
               ) : issues.length === 0 ? (
-                <p className="text-center text-[10px] text-gray-400 dark:text-dark-text-muted py-4">No recent community updates.</p>
+                <p className="text-center text-[10px] text-gray-400 py-4">No recent community updates.</p>
               ) : (
                 issues.slice(0, 3).map((issue) => {
                   const reporter = typeof issue.reportedBy === 'object' ? issue.reportedBy?.name : 'Aarav Sharma';
@@ -470,7 +479,7 @@ const CitizenDashboard = () => {
                   
                   return (
                     <div key={issue._id} className="flex items-start gap-3 text-xs">
-                      <div className="h-8 w-8 rounded-full bg-slate-50 border border-gray-100 dark:bg-dark-bg dark:border-dark-border flex items-center justify-center font-extrabold text-[10px] uppercase shrink-0 text-gray-700 dark:text-slate-200">
+                      <div className="h-8 w-8 rounded-full bg-slate-50 border border-gray-100 dark:bg-slate-800 dark:border-slate-700 flex items-center justify-center font-bold text-[10px] uppercase shrink-0">
                         {reporter.substring(0, 2)}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -478,7 +487,7 @@ const CitizenDashboard = () => {
                           <span className="font-bold">{reporter}</span> {actionText}{' '}
                           <span className="font-semibold text-gray-900 dark:text-white">"{issue.title}"</span>
                         </p>
-                        <span className="text-[9px] text-gray-400 dark:text-dark-text-muted mt-1 block">{timeStr}</span>
+                        <span className="text-[9px] text-gray-400 mt-1 block">{timeStr}</span>
                       </div>
                       <span className="shrink-0 text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
                         {issue.status === 'Resolved' ? '+20 pts' : '+10 pts'}
@@ -491,28 +500,29 @@ const CitizenDashboard = () => {
           </div>
 
           {/* Section 2: Badges Earned */}
-          <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-3xl p-6 shadow-sm">
+          <div className="glass rounded-3xl p-6 shadow-sm border border-gray-150/40">
             <div className="flex justify-between items-center mb-5">
               <h3 className="font-extrabold text-xs text-gray-900 dark:text-white uppercase tracking-wider">Badges Earned</h3>
-              <Link to="/rewards" className="text-xs text-emerald-650 dark:text-emerald-405 font-bold hover:underline">
+              <Link to="/rewards" className="text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
                 View All
               </Link>
             </div>
             
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 gap-4">
               {badgeList.map((badge) => {
                 const IconComp = badge.icon;
                 return (
                   <div 
-                    key={badge.name} 
-                    className={`flex flex-col items-center p-2 rounded-xl border border-gray-100 dark:border-dark-border text-center transition-all ${
-                      badge.active ? 'opacity-100 bg-gray-50/10 dark:bg-dark-bg/60 shadow-sm' : 'opacity-30 select-none grayscale bg-slate-50/50 dark:bg-slate-850/20'
+                    key={badge.id} 
+                    className={`flex flex-col items-center p-3 rounded-xl border border-gray-100 dark:border-slate-800 text-center transition-all ${
+                      badge.active ? 'opacity-100 bg-white dark:bg-slate-900 shadow-sm' : 'opacity-40 select-none grayscale bg-slate-50/50 dark:bg-slate-850/20'
                     }`}
                   >
-                    <div className={`h-11 w-11 rounded-full bg-gradient-to-tr ${badge.color} flex items-center justify-center text-emerald-600 dark:text-[#10b981] shadow-md shrink-0`}>
+                    <div className={`h-11 w-11 rounded-full bg-gradient-to-tr ${badge.color} flex items-center justify-center text-white shadow-md`}>
                       <IconComp size={18} />
                     </div>
-                    <span className="block font-bold text-[8px] text-gray-900 dark:text-white mt-2 leading-tight uppercase tracking-wider">{badge.name.split(' ')[0]}</span>
+                    <span className="block font-bold text-[10px] text-gray-900 dark:text-white mt-2 leading-tight">{badge.name}</span>
+                    <span className="block text-[8px] text-gray-450 mt-0.5">{badge.desc}</span>
                   </div>
                 );
               })}
@@ -520,53 +530,39 @@ const CitizenDashboard = () => {
           </div>
 
           {/* Section 3: Top Contributors (Leaderboard) */}
-          <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-3xl p-6 shadow-sm space-y-4">
+          <div className="glass rounded-3xl p-6 shadow-sm border border-gray-150/40 space-y-4">
             <div className="flex justify-between items-center">
               <h3 className="font-extrabold text-xs text-gray-900 dark:text-white uppercase tracking-wider">Top Contributors</h3>
-              <Link to="/leaderboard" className="text-xs text-emerald-650 dark:text-emerald-400 font-bold hover:underline">
+              <Link to="/leaderboard" className="text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline">
                 View Leaderboard
               </Link>
             </div>
 
             <div className="space-y-2.5">
-              {topContributors.map((contrib, idx) => {
-                const isSelf = contrib._id === user?._id;
-                return (
-                  <div 
-                    key={contrib._id} 
-                    className={`flex items-center justify-between p-2 rounded-xl border text-xs transition-all ${
-                      isSelf 
-                        ? 'bg-[#0c231a] border-emerald-900/30' 
-                        : 'border-gray-50 dark:border-dark-border/40 bg-slate-50/30'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className={`font-bold text-[10px] w-4 ${isSelf ? 'text-emerald-400' : 'text-gray-400 dark:text-dark-text-muted'}`}>{idx + 1}</span>
-                      <div className={`h-7 w-7 rounded-full flex items-center justify-center font-bold text-[10px] uppercase shrink-0 ${
-                        isSelf ? 'bg-emerald-500 text-white' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400'
-                      }`}>
-                        {contrib.name.substring(0, 2)}
-                      </div>
-                      <span className={`font-bold truncate ${isSelf ? 'text-emerald-400' : 'text-gray-800 dark:text-slate-200'}`}>
-                        {contrib.name} {isSelf && '(You)'}
-                      </span>
-                    </div>
-                    <span className={`font-extrabold text-[10px] ${isSelf ? 'text-emerald-400' : 'text-gray-900 dark:text-white'}`}>{contrib.points} pts</span>
-                  </div>
-                );
-              })}
-
-              {/* Current user rank indicator at the bottom if rank > 3 */}
-              {userLeaderboardInfo && rank > 3 && (
-                <div className="flex items-center justify-between p-2 rounded-xl bg-[#0c231a] border border-emerald-900/35 text-xs">
+              {topContributors.map((contrib, idx) => (
+                <div key={contrib._id} className="flex items-center justify-between p-2 rounded-xl border border-gray-50 dark:border-slate-850 bg-slate-50/30 text-xs">
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className="font-extrabold text-[10px] text-[#10b981] w-4">{rank}</span>
-                    <div className="h-7 w-7 rounded-full bg-emerald-605 text-white flex items-center justify-center font-bold text-[10px] uppercase shrink-0">
+                    <span className="font-bold text-[10px] text-gray-405 w-4">{idx + 1}</span>
+                    <div className="h-7 w-7 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/20 dark:text-emerald-400 flex items-center justify-center font-bold text-[10px] uppercase shrink-0">
+                      {contrib.name.substring(0, 2)}
+                    </div>
+                    <span className="font-bold text-gray-800 dark:text-slate-200 truncate">{contrib.name}</span>
+                  </div>
+                  <span className="font-extrabold text-gray-900 dark:text-white text-[10px]">{contrib.points} pts</span>
+                </div>
+              ))}
+
+              {/* Current user rank indicator at the bottom */}
+              {userLeaderboardInfo && rank > 3 && (
+                <div className="flex items-center justify-between p-2.5 rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/40 dark:bg-[#0c231a] text-xs mt-4">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className="font-black text-[10px] text-emerald-650 dark:text-emerald-400 w-4">{rank}</span>
+                    <div className="h-7 w-7 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] uppercase shrink-0">
                       {userLeaderboardInfo.name.substring(0, 2)}
                     </div>
-                    <span className="font-black text-emerald-400 truncate">You ({userLeaderboardInfo.name})</span>
+                    <span className="font-black text-emerald-850 dark:text-emerald-400 truncate">{userLeaderboardInfo.name} (You)</span>
                   </div>
-                  <span className="font-black text-emerald-400 text-[10px]">{userLeaderboardInfo.points} pts</span>
+                  <span className="font-black text-emerald-700 dark:text-emerald-400 text-[10px]">{userLeaderboardInfo.points} pts</span>
                 </div>
               )}
             </div>
@@ -576,39 +572,39 @@ const CitizenDashboard = () => {
       </div>
 
       {/* Section: Community Impact Metrics Footer */}
-      <div className="bg-white dark:bg-dark-card border border-gray-150/40 dark:border-dark-border rounded-3xl p-6 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+      <div className="glass rounded-3xl p-6 border border-gray-150/40 shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-emerald-50 dark:bg-[#0c231a] text-emerald-600 dark:text-[#10b981] rounded-2xl shadow-inner shrink-0">
+          <div className="p-3 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 rounded-2xl shadow-inner">
             <Leaf size={24} />
           </div>
           <div>
-            <h4 className="font-extrabold text-xs text-gray-905 dark:text-white uppercase tracking-wider">Community Impact</h4>
-            <p className="text-[10px] text-gray-400 dark:text-dark-text-muted font-semibold mt-1">Keep going! Your efforts are making a real difference.</p>
+            <h4 className="font-extrabold text-xs text-gray-900 dark:text-white uppercase tracking-wider">Community Impact</h4>
+            <p className="text-[10px] text-gray-400 font-medium mt-1">Keep going! Your efforts are making a real difference.</p>
           </div>
         </div>
 
         <div className="flex-1 w-full grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-gray-50/50 dark:bg-dark-bg/60 p-3 rounded-2xl text-center border border-gray-100/50 dark:border-dark-border/40">
-            <span className="block text-[8px] font-bold text-gray-400 dark:text-dark-text-muted uppercase tracking-widest">CO2 Reduced</span>
-            <span className="block text-lg font-black text-emerald-650 dark:text-emerald-400 mt-1 font-sans">
+          <div className="bg-slate-50/50 dark:bg-slate-850/20 p-3 rounded-2xl text-center border border-gray-100/60 dark:border-slate-800/40">
+            <span className="block text-[8px] font-bold text-gray-400 uppercase tracking-widest">CO2 Reduced</span>
+            <span className="block text-lg font-black text-emerald-600 dark:text-emerald-400 mt-1 font-sans">
               {(resolvedCount * 3.5).toFixed(1)} kg
             </span>
           </div>
-          <div className="bg-gray-50/50 dark:bg-dark-bg/60 p-3 rounded-2xl text-center border border-gray-100/50 dark:border-dark-border/40">
-            <span className="block text-[8px] font-bold text-gray-405 dark:text-dark-text-muted uppercase tracking-widest">Issues Resolved</span>
-            <span className="block text-lg font-black text-blue-600 dark:text-blue-400 mt-1 font-sans">
+          <div className="bg-slate-50/50 dark:bg-slate-850/20 p-3 rounded-2xl text-center border border-gray-100/60 dark:border-slate-800/40">
+            <span className="block text-[8px] font-bold text-gray-405 uppercase tracking-widest">Issues Resolved</span>
+            <span className="block text-lg font-black text-blue-650 dark:text-blue-400 mt-1 font-sans">
               {resolvedCount}
             </span>
           </div>
-          <div className="bg-gray-50/50 dark:bg-dark-bg/60 p-3 rounded-2xl text-center border border-gray-100/50 dark:border-dark-border/40">
-            <span className="block text-[8px] font-bold text-gray-405 dark:text-dark-text-muted uppercase tracking-widest">People Helped</span>
-            <span className="block text-lg font-black text-amber-500 dark:text-amber-400 mt-1 font-sans">
+          <div className="bg-slate-50/50 dark:bg-slate-850/20 p-3 rounded-2xl text-center border border-gray-100/60 dark:border-slate-800/40">
+            <span className="block text-[8px] font-bold text-gray-405 uppercase tracking-widest">People Helped</span>
+            <span className="block text-lg font-black text-amber-550 dark:text-amber-400 mt-1 font-sans">
               {resolvedCount * 18}
             </span>
           </div>
-          <div className="bg-gray-50/50 dark:bg-dark-bg/60 p-3 rounded-2xl text-center border border-gray-100/50 dark:border-dark-border/40">
-            <span className="block text-[8px] font-bold text-gray-405 dark:text-dark-text-muted uppercase tracking-widest">Communities</span>
-            <span className="block text-lg font-black text-purple-650 dark:text-purple-400 mt-1 font-sans">
+          <div className="bg-slate-50/50 dark:bg-slate-850/20 p-3 rounded-2xl text-center border border-gray-100/60 dark:border-slate-800/40">
+            <span className="block text-[8px] font-bold text-gray-405 uppercase tracking-widest">Communities</span>
+            <span className="block text-lg font-black text-purple-650 dark:text-purple-405 mt-1 font-sans">
               {new Set(myIssues.map(i => i.location?.address?.split(',').slice(-2, -1)[0]?.trim())).size || 1}
             </span>
           </div>

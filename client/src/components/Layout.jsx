@@ -11,7 +11,7 @@ const Layout = () => {
   // If loading user profile, show a sleek full page loading spinner
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-dark-bg flex flex-col justify-center items-center gap-4 transition-colors duration-200">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center items-center gap-4 transition-colors duration-200">
         <div className="relative h-12 w-12">
           <div className="absolute inset-0 rounded-full border-4 border-emerald-500/20" />
           <div className="absolute inset-0 rounded-full border-4 border-t-emerald-500 animate-spin" />
@@ -47,7 +47,7 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-dark-bg text-gray-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-200">
       {/* Sidebar navigation */}
       <Sidebar />
 

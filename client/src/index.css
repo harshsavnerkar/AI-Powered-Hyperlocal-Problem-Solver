@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 @import "leaflet/dist/leaflet.css";
 
@@ -15,12 +16,10 @@
   --color-admin: #7c3aed;
   --color-admin-dark: #4c1d95;
   
-  --color-dark-bg: #0b1317;
-  --color-dark-sidebar: #090e11;
-  --color-dark-card: #0f1a20;
-  --color-dark-border: #182830;
-  --color-dark-text-muted: #8a9da6;
-  --color-dark-active-bg: #0c231a;
+  --color-slate-950: #0b1317;
+  --color-slate-900: #090e11;
+  --color-slate-800: #182830;
+  --color-slate-850: #132229;
   
   --font-sans: 'Inter', 'Outfit', sans-serif;
 }
@@ -44,10 +43,20 @@
 }
 
 .dark .glass {
-  background: rgba(15, 23, 42, 0.6);
+  background: #0f1a20;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid #182830;
+}
+
+/* Sidebar Custom Active Overrides */
+.dark aside a.active {
+  background-color: #0c231a !important;
+  color: #10b981 !important;
+  border-right: none !important;
+}
+.dark aside a.active svg {
+  color: #10b981 !important;
 }
 
 /* Leaflet map styles */
@@ -72,5 +81,5 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-slate-600;
+  @apply bg-gray-405 dark:bg-slate-600;
 }
