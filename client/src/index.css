@@ -81,5 +81,5 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-405 dark:bg-slate-600;
+  @apply bg-gray-400 dark:bg-slate-600;
 }
