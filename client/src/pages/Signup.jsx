@@ -108,67 +108,65 @@ const Signup = () => {
         </div>
 
         {/* Info list */}
-        <div className="my-auto space-y-8 z-10 max-w-md flex-1 flex flex-col justify-between py-6">
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white font-sans leading-tight">
-                Create Account
-              </h2>
-              <p className="text-xs text-gray-500 dark:text-slate-400">
-                Join thousands of community <span className="text-emerald-600 dark:text-emerald-400 font-bold">heroes</span> making a difference.
-              </p>
-            </div>
-
-            {/* Core App Benefits */}
-            <div className="space-y-4">
-              {/* Benefit 1 */}
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl">
-                  <Megaphone size={16} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-900 dark:text-white">Report Issues</h4>
-                  <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">
-                    Easily report problems in your area with photos and location.
-                  </p>
-                </div>
-              </div>
-
-              {/* Benefit 2 */}
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl">
-                  <LineChart size={16} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-900 dark:text-white">Track Progress</h4>
-                  <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">
-                    Stay updated on the status and resolution of issues.
-                  </p>
-                </div>
-              </div>
-
-              {/* Benefit 3 */}
-              <div className="flex items-start gap-3">
-                <div className="p-2 bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-xl">
-                  <Trophy size={16} />
-                </div>
-                <div>
-                  <h4 className="text-xs font-bold text-gray-900 dark:text-white">Earn Rewards</h4>
-                  <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">
-                    Earn points and badges for your contributions to the community.
-                  </p>
-                </div>
-              </div>
-            </div>
+        <div className="my-auto space-y-6 z-10 max-w-md">
+          <div className="space-y-3">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white font-sans leading-tight">
+              Create Account
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-slate-400">
+              Join thousands of community <span className="text-emerald-600 dark:text-emerald-400 font-bold">heroes</span> making a difference.
+            </p>
           </div>
 
-          {/* Real Illustration Image */}
-          <div className="mt-4 relative w-full flex-grow flex items-end">
+          {/* Real Illustration Image in the middle */}
+          <div className="relative w-full rounded-2xl overflow-hidden">
             <img 
               src={signupIllustration} 
               alt="Community Hero Signup Illustration" 
-              className="w-full object-contain max-h-[220px] rounded-2xl" 
+              className="w-full object-contain max-h-[260px]" 
             />
+          </div>
+
+          {/* Core App Benefits below image */}
+          <div className="space-y-4">
+            {/* Benefit 1 */}
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                <Megaphone size={16} />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-gray-900 dark:text-white">Report Issues</h4>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">
+                  Easily report problems in your area with photos and location.
+                </p>
+              </div>
+            </div>
+
+            {/* Benefit 2 */}
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 rounded-xl">
+                <LineChart size={16} />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-gray-900 dark:text-white">Track Progress</h4>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">
+                  Stay updated on the status and resolution of issues.
+                </p>
+              </div>
+            </div>
+
+            {/* Benefit 3 */}
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-amber-100 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 rounded-xl">
+                <Trophy size={16} />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-gray-900 dark:text-white">Earn Rewards</h4>
+                <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-0.5">
+                  Earn points and badges for your contributions to the community.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
