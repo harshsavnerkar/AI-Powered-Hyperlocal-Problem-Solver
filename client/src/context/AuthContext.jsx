@@ -6,6 +6,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:50
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [googleData, setGoogleData] = useState(null);
   const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -59,10 +60,80 @@ export const AuthProvider = ({ children }) => {
         throw new Error(data.message || 'Login failed');
       }
 
+      if (data.otpRequired) {
+        return data; // Return directly so UI can show OTP modal
+      }
+
       localStorage.setItem('token', data.token);
       setToken(data.token);
       setUser(data);
       return data;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyLoginOtp = async (email, otp) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/verify-login-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, otp })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'OTP verification failed');
+      }
+
+      localStorage.setItem('token', data.token);
+      setToken(data.token);
+      setUser(data);
+      return data;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const googleLogin = async (idToken) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/google-login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ idToken })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Google authentication failed');
+      }
+
+      if (data.exists) {
+        localStorage.setItem('token', data.user.token);
+        setToken(data.user.token);
+        setUser(data.user);
+        setGoogleData(null);
+        return { exists: true, user: data.user };
+      } else {
+        setGoogleData(data.googleData);
+        return { exists: false, googleData: data.googleData };
+      }
     } catch (err) {
       setError(err.message);
       throw err;
@@ -92,6 +163,7 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('token', data.token);
       setToken(data.token);
       setUser(data);
+      setGoogleData(null);
       return data;
     } catch (err) {
       setError(err.message);
@@ -105,6 +177,11 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
+    setGoogleData(null);
+  };
+
+  const clearGoogleData = () => {
+    setGoogleData(null);
   };
 
   const updateUserPoints = (points, badges) => {
@@ -112,7 +189,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, error, login, signup, logout, updateUserPoints }}>
+    <AuthContext.Provider value={{ user, token, loading, error, login, signup, logout, updateUserPoints, googleLogin, googleData, clearGoogleData, verifyLoginOtp }}>
       {children}
     </AuthContext.Provider>
   );

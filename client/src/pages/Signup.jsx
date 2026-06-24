@@ -16,9 +16,10 @@ import {
   Trophy
 } from 'lucide-react';
 import signupIllustration from '../assets/signup_illustration.png';
+import OtpModal from '../components/OtpModal.jsx';
 
 const Signup = () => {
-  const { signup, error: authError } = useAuth();
+  const { signup, googleLogin, googleData, clearGoogleData, error: authError } = useAuth();
   const navigate = useNavigate();
 
   const [name, setName] = useState('');
@@ -28,6 +29,82 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('citizen'); // default citizen
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [isGoogleRegistered, setIsGoogleRegistered] = useState(false);
+  const [googleScriptLoaded, setGoogleScriptLoaded] = useState(false);
+
+  const handleGoogleCallback = async (credential) => {
+    setLoading(true);
+    setLocalError('');
+    try {
+      const result = await googleLogin(credential);
+      if (result.exists) {
+        alert('📢 You already have an account! Logging you in...');
+        navigate('/dashboard');
+      } else {
+        alert('📢 Google authentication successful!\n\nPlease enter your Phone Number, create a Password, and select your Role to finish creating your account.');
+      }
+    } catch (err) {
+      setLocalError(err.message || 'Google Sign-In failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleClickFallback = () => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      alert('📢 Google OAuth Client ID is not configured.\n\nTo run real Google Login, please set VITE_GOOGLE_CLIENT_ID in client/.env.\n\nRunning in Simulation Mode to demonstrate the signup auto-fill flow...');
+    }
+    handleGoogleCallback('simulated_google_token');
+  };
+
+  useEffect(() => {
+    /* global google */
+    const initGoogle = () => {
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      if (typeof google !== 'undefined' && clientId) {
+        setGoogleScriptLoaded(true);
+        try {
+          google.accounts.id.initialize({
+            client_id: clientId,
+            callback: (res) => handleGoogleCallback(res.credential)
+          });
+          google.accounts.id.renderButton(
+            document.getElementById('google-signup-button'),
+            { theme: 'outline', size: 'large', width: '380' }
+          );
+        } catch (e) {
+          console.warn('Failed to render native Google button:', e);
+        }
+      }
+    };
+
+    // Check periodically for google script load
+    const interval = setInterval(() => {
+      if (typeof google !== 'undefined' && import.meta.env.VITE_GOOGLE_CLIENT_ID) {
+        initGoogle();
+        clearInterval(interval);
+      }
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (googleData) {
+      setName(googleData.name || '');
+      setEmail(googleData.email || '');
+      setIsGoogleRegistered(true);
+    } else {
+      setIsGoogleRegistered(false);
+    }
+  }, [googleData]);
+
+  useEffect(() => {
+    return () => {
+      clearGoogleData();
+    };
+  }, []);
   
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -63,6 +140,11 @@ const Signup = () => {
     setPasswordStrength({ score, text, color });
   }, [password]);
 
+  // OTP Verification Modal States
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLocalError('');
@@ -84,8 +166,21 @@ const Signup = () => {
 
     setLoading(true);
     try {
-      await signup({ name, email, phone, password, role });
-      navigate('/dashboard');
+      if (isGoogleRegistered) {
+        // Bypass OTP for verified Google emails
+        await signup({ name, email, phone, password, role, isGoogle: true });
+        navigate('/dashboard');
+      } else {
+        // Send OTP for manual signup
+        await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/send-otp`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email })
+        });
+        setShowOtpModal(true);
+      }
     } catch (err) {
       setLocalError(err.message || 'Registration failed. Please try again.');
     } finally {
@@ -93,10 +188,41 @@ const Signup = () => {
     }
   };
 
+  const handleOtpSubmit = async (otp) => {
+    setOtpLoading(true);
+    setOtpError('');
+    try {
+      await signup({ name, email, phone, password, role, isGoogle: false, otp });
+      setShowOtpModal(false);
+      navigate('/dashboard');
+    } catch (err) {
+      setOtpError(err.message || 'Invalid or expired OTP');
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setOtpError('');
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/send-otp`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+      alert('📢 A new verification code has been sent to your email!');
+    } catch (err) {
+      setOtpError('Failed to resend OTP');
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex transition-colors duration-200">
-      {/* Left split panel - Illustration & Benefits list */}
-      <div className="hidden lg:flex lg:w-1/2 bg-emerald-50/50 dark:bg-slate-900 border-r border-gray-100 dark:border-slate-800 flex-col justify-between p-12 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 md:p-8 transition-colors duration-200">
+      <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-150 dark:border-slate-800 flex flex-col lg:flex-row min-h-[600px] lg:min-h-[680px]">
+        {/* Left split panel - Illustration & Benefits list */}
+        <div className="hidden lg:flex lg:w-1/2 bg-emerald-50/50 dark:bg-slate-900 border-r border-gray-150 dark:border-slate-800 flex-col justify-between p-10 relative overflow-hidden">
         {/* Header Logo */}
         <div className="flex items-center gap-3 z-10">
           <div className="p-2 bg-emerald-600 text-white rounded-lg">
@@ -176,8 +302,8 @@ const Signup = () => {
         </div>
       </div>
 
-      {/* Right split panel - Registration Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12">
+        {/* Right split panel - Registration Form */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-10">
         <div className="w-full max-w-xl space-y-6">
           <div>
             <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white font-sans tracking-tight">
@@ -210,10 +336,11 @@ const Signup = () => {
                   id="name"
                   type="text"
                   required
+                  disabled={isGoogleRegistered}
                   placeholder="Enter your full name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-xs shadow-sm transition-all"
+                  className={`block w-full pl-10 pr-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-xs shadow-sm transition-all ${isGoogleRegistered ? 'bg-gray-100 dark:bg-slate-800 text-gray-500 cursor-not-allowed opacity-80' : ''}`}
                 />
               </div>
             </div>
@@ -231,10 +358,11 @@ const Signup = () => {
                   id="email"
                   type="email"
                   required
+                  disabled={isGoogleRegistered}
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-xs shadow-sm transition-all"
+                  className={`block w-full pl-10 pr-3 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-xs shadow-sm transition-all ${isGoogleRegistered ? 'bg-gray-100 dark:bg-slate-800 text-gray-500 cursor-not-allowed opacity-80' : ''}`}
                 />
               </div>
             </div>
@@ -435,6 +563,37 @@ const Signup = () => {
             </button>
           </form>
 
+          {/* Social signup separator */}
+          <div className="relative py-2 flex items-center">
+            <div className="flex-grow border-t border-gray-200 dark:border-slate-800" />
+            <span className="flex-shrink mx-4 text-xs font-bold text-gray-400 uppercase tracking-widest bg-white dark:bg-slate-900 px-2">
+              or continue with
+            </span>
+            <div className="flex-grow border-t border-gray-200 dark:border-slate-800" />
+          </div>
+
+          {/* Google Button Container */}
+          <div className="w-full flex flex-col items-center justify-center min-h-[46px] mt-0.5">
+            {googleScriptLoaded ? (
+              <div id="google-signup-button" className="w-full flex justify-center"></div>
+            ) : (
+              <button
+                onClick={handleGoogleClickFallback}
+                type="button"
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl text-sm font-bold border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-slate-200 shadow-sm cursor-pointer transition-all duration-150"
+              >
+                {/* Google G icon SVG */}
+                <svg className="h-5 w-5" viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="#EA4335" d="M12 5.04c1.67 0 3.2.58 4.38 1.69l3.27-3.27C17.67 1.54 15.02 1 12 1 7.35 1 3.4 3.65 1.54 7.54l3.85 2.99C6.27 7.02 8.91 5.04 12 5.04z" />
+                  <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.42 3.58l3.77 2.92c2.2-2.03 3.68-5.02 3.68-8.65z" />
+                  <path fill="#FBBC05" d="M5.39 14.53c-.25-.75-.39-1.55-.39-2.38 0-.83.14-1.63.39-2.38L1.54 6.78C.56 8.74 0 10.92 0 13.25c0 2.33.56 4.51 1.54 6.47l3.85-3.19z" />
+                  <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.92l-3.77-2.92c-1.11.75-2.53 1.19-4.19 1.19-3.09 0-5.73-1.98-6.61-4.96L1.54 16.5c1.86 3.89 5.81 6.5 10.46 6.5z" />
+                </svg>
+                Continue with Google
+              </button>
+            )}
+          </div>
+
           {/* Login prompt */}
           <p className="text-center text-sm font-semibold text-gray-500">
             Already have an account?{' '}
@@ -444,6 +603,17 @@ const Signup = () => {
           </p>
         </div>
       </div>
+      </div>
+      {/* OTP Verification Modal */}
+      <OtpModal
+        isOpen={showOtpModal}
+        onClose={() => setShowOtpModal(false)}
+        onSubmit={handleOtpSubmit}
+        email={email}
+        loading={otpLoading}
+        error={otpError}
+        onResend={handleResendOtp}
+      />
     </div>
   );
 };

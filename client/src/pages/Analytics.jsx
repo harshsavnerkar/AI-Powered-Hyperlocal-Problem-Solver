@@ -24,6 +24,29 @@ const Analytics = () => {
   const [metrics, setMetrics] = useState({ totalIssues: 0, pendingIssues: 0, inProgressIssues: 0, resolvedIssues: 0, avgResolutionTime: '0 hrs' });
   const [charts, setCharts] = useState({ issuesByCategory: [], statusOverview: [], monthlyTrends: [], heatmapData: [], verificationStats: [] });
   const [loading, setLoading] = useState(true);
+  const [mapCenter, setMapCenter] = useState([28.6139, 77.2090]);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMapCenter([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.warn('Analytics geolocation failed:', error);
+        }
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    if (charts.heatmapData && charts.heatmapData.length > 0 && mapCenter[0] === 28.6139 && mapCenter[1] === 77.2090) {
+      const firstItem = charts.heatmapData[0];
+      if (firstItem && firstItem.latitude && firstItem.longitude) {
+        setMapCenter([firstItem.latitude, firstItem.longitude]);
+      }
+    }
+  }, [charts.heatmapData, mapCenter]);
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -160,7 +183,7 @@ const Analytics = () => {
         <div className="glass rounded-2xl p-6 shadow-sm flex flex-col justify-between">
           <h3 className="font-extrabold text-xs text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-4">5. Area-wise Distribution Map</h3>
           <div className="h-64 rounded-xl border border-gray-150 dark:border-slate-800/80 overflow-hidden relative shadow-sm">
-            <MapContainer center={[28.6139, 77.2090]} zoom={13} className="h-full w-full">
+            <MapContainer center={mapCenter} zoom={13} key={`${mapCenter[0]}-${mapCenter[1]}`} className="h-full w-full">
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

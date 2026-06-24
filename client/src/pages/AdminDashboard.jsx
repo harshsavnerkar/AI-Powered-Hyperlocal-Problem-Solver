@@ -29,7 +29,7 @@ const AdminDashboard = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
   
-  const [metrics, setMetrics] = useState({ totalIssues: 342, pendingIssues: 128, inProgressIssues: 76, resolvedIssues: 138, avgResolutionTime: '24 hrs' });
+  const [metrics, setMetrics] = useState({ totalIssues: 0, pendingIssues: 0, inProgressIssues: 0, resolvedIssues: 0, avgResolutionTime: '0 hrs' });
   const [charts, setCharts] = useState({ issuesByCategory: [], statusOverview: [], monthlyTrends: [], heatmapData: [] });
   const [aiInsights, setAiInsights] = useState({ hotspots: [], predictiveAlerts: [], risingCategories: [] });
   

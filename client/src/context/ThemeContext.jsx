@@ -9,7 +9,7 @@ export const ThemeProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    const root = window.document.body;
+    const root = window.document.documentElement;
     if (darkMode) {
       root.classList.add('dark');
       localStorage.setItem('theme', 'dark');

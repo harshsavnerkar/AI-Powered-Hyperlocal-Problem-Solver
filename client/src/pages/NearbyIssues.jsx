@@ -6,11 +6,29 @@ const NearbyIssues = () => {
   const { token } = useAuth();
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userCoords, setUserCoords] = useState({ latitude: 28.6139, longitude: 77.2090 });
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserCoords({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.warn('Geolocation fallback to default:', error.message);
+        },
+        { enableHighAccuracy: true, timeout: 6000, maximumAge: 10000 }
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const loadNearby = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/issues/nearby?latitude=28.6139&longitude=77.2090&radius=3000`, {
+        const response = await fetch(`${API_BASE_URL}/issues/nearby?latitude=${userCoords.latitude}&longitude=${userCoords.longitude}&radius=3000`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -26,7 +44,7 @@ const NearbyIssues = () => {
       }
     };
     if (token) loadNearby();
-  }, [token]);
+  }, [token, userCoords]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

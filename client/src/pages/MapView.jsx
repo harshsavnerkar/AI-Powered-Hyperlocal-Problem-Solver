@@ -8,6 +8,29 @@ const MapView = () => {
   const { token } = useAuth();
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [mapCenter, setMapCenter] = useState([28.6139, 77.2090]);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMapCenter([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.warn('Geolocation failed:', error);
+        }
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    if (issues.length > 0 && mapCenter[0] === 28.6139 && mapCenter[1] === 77.2090) {
+      const issueWithCoords = issues.find(i => i.location?.latitude && i.location?.longitude);
+      if (issueWithCoords) {
+        setMapCenter([issueWithCoords.location.latitude, issueWithCoords.location.longitude]);
+      }
+    }
+  }, [issues, mapCenter]);
 
   useEffect(() => {
     const loadIssues = async () => {
@@ -74,7 +97,7 @@ const MapView = () => {
         </div>
       </div>
 
-      <MapContainer center={[28.6139, 77.2090]} zoom={14} className="h-full w-full">
+      <MapContainer center={mapCenter} zoom={14} key={`${mapCenter[0]}-${mapCenter[1]}`} className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

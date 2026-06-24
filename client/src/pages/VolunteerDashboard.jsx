@@ -22,11 +22,28 @@ const VolunteerDashboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actioningId, setActioningId] = useState(null);
+  const [userCoords, setUserCoords] = useState({ latitude: 28.6139, longitude: 77.2090 });
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserCoords({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.warn('Volunteer Geolocation fallback:', error.message);
+        }
+      );
+    }
+  }, []);
 
   const fetchDashboardData = async () => {
     try {
       // Get nearby issues (radius 2km, default coordinate New Delhi)
-      const nearbyRes = await fetch(`${API_BASE_URL}/issues/nearby?latitude=28.6139&longitude=77.2090&radius=2000`, {
+      const nearbyRes = await fetch(`${API_BASE_URL}/issues/nearby?latitude=${userCoords.latitude}&longitude=${userCoords.longitude}&radius=2000`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -58,7 +75,7 @@ const VolunteerDashboard = () => {
     if (token) {
       fetchDashboardData();
     }
-  }, [token]);
+  }, [token, userCoords]);
 
   const handleVerifyAction = async (issueId, status) => {
     setActioningId(issueId);
@@ -98,10 +115,10 @@ const VolunteerDashboard = () => {
     }
   };
 
-  const verifiedCount = user?.points ? Math.floor(user.points / 5) : 25;
-  const accuracy = 92;
-  const points = user?.points || 180;
-  const rank = user?.rank || 8;
+  const verifiedCount = user?.points ? Math.floor(user.points / 5) : 0;
+  const accuracy = user?.points ? 92 : 100;
+  const points = user?.points !== undefined ? user.points : 0;
+  const rank = user?.rank !== undefined ? user.rank : 0;
 
   return (
     <div className="space-y-6">
@@ -132,7 +149,13 @@ const VolunteerDashboard = () => {
         <div className="glass rounded-2xl p-5 border-l-4 border-violet-500 shadow-sm">
           <span className="block text-xs font-bold text-gray-400 uppercase tracking-wider">Current Rank</span>
           <span className="block text-3xl font-extrabold text-gray-900 dark:text-white mt-2 font-sans">
-            {rank} <span className="text-xs font-medium text-gray-400">of 150</span>
+            {rank > 0 ? (
+              <>
+                {rank} <span className="text-xs font-medium text-gray-400">of 150</span>
+              </>
+            ) : (
+              'Unranked'
+            )}
           </span>
         </div>
       </div>

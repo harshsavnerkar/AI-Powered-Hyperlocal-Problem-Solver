@@ -8,20 +8,32 @@ import { getStore, saveStore } from '../config/db.js';
 export const seedDatabase = async () => {
   try {
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash('password123', salt);
+    const hashCitizen = await bcrypt.hash('Harsh@2886', salt);
+    const hashVolunteer = await bcrypt.hash('Yash@12', salt);
+    const hashAdmin = await bcrypt.hash('Teju@12', salt);
 
     if (global.dbFallback) {
       const store = getStore();
+
+      // Clear old seed data if present
+      if (store.users.some(u => u.email === 'aarav@civic.com')) {
+        console.log('🧹 Clearing old JSON fallback seed data...');
+        store.users = [];
+        store.issues = [];
+        store.verifications = [];
+        store.notifications = [];
+      }
+
       if (store.users.length > 0) return; // Already seeded
 
-      console.log('🌱 Seeding local JSON database...');
+      console.log('🌱 Seeding local JSON database with custom users...');
 
       const u1 = {
-        _id: 'u_aarav',
-        name: 'Aarav Sharma',
-        email: 'aarav@civic.com',
+        _id: 'u_harsh',
+        name: 'Harsh Savnerkar',
+        email: 'harsh@citizen.com',
         phone: '9876543210',
-        password: hashedPassword,
+        password: hashCitizen,
         role: 'citizen',
         points: 250,
         rank: 15,
@@ -30,11 +42,11 @@ export const seedDatabase = async () => {
       };
 
       const u2 = {
-        _id: 'u_rohan',
-        name: 'Rohan Mehta',
-        email: 'volunteer@civic.com',
+        _id: 'u_yash',
+        name: 'Yash Foundation',
+        email: 'yashfoundation@volunteer.com',
         phone: '9876543211',
-        password: hashedPassword,
+        password: hashVolunteer,
         role: 'volunteer',
         points: 180,
         rank: 8,
@@ -43,11 +55,11 @@ export const seedDatabase = async () => {
       };
 
       const u3 = {
-        _id: 'u_admin',
-        name: 'Admin Controller',
-        email: 'admin@civic.com',
+        _id: 'u_tejas',
+        name: 'Tejas Controller',
+        email: 'tejas@admin.com',
         phone: '9876543212',
-        password: hashedPassword,
+        password: hashAdmin,
         role: 'admin',
         points: 0,
         rank: 0,
@@ -66,7 +78,7 @@ export const seedDatabase = async () => {
         status: 'In Progress',
         location: { latitude: 28.6145, longitude: 77.2085, address: 'Sector 15, Main Road' },
         media: { imageUrl: '', videoUrl: '' },
-        reportedBy: 'u_aarav',
+        reportedBy: 'u_harsh',
         assignedTeam: 'Public Works Division',
         trustScore: 85,
         aiAnalysis: { categoryConfidence: 0.94, duplicateChecked: true, possibleDuplicateOf: null, smartSummary: 'Pothole on main road', hotspotScore: 1 },
@@ -82,7 +94,7 @@ export const seedDatabase = async () => {
         status: 'Assigned',
         location: { latitude: 28.6120, longitude: 77.2100, address: 'Sector 12, Near School' },
         media: { imageUrl: '', videoUrl: '' },
-        reportedBy: 'u_aarav',
+        reportedBy: 'u_harsh',
         assignedTeam: 'Water & Sewage Board',
         trustScore: 90,
         aiAnalysis: { categoryConfidence: 0.91, duplicateChecked: true, possibleDuplicateOf: null, smartSummary: 'Water leakage', hotspotScore: 1 },
@@ -98,7 +110,7 @@ export const seedDatabase = async () => {
         status: 'Resolved',
         location: { latitude: 28.6170, longitude: 77.2050, address: 'Sector 8, City Market' },
         media: { imageUrl: '', videoUrl: '' },
-        reportedBy: 'u_aarav',
+        reportedBy: 'u_harsh',
         assignedTeam: 'Municipal Cleaners',
         trustScore: 100,
         aiAnalysis: { categoryConfidence: 0.98, duplicateChecked: true, possibleDuplicateOf: null, smartSummary: 'Garbage pile near market', hotspotScore: 1 },
@@ -115,7 +127,7 @@ export const seedDatabase = async () => {
         status: 'Reported',
         location: { latitude: 28.6135, longitude: 77.2095, address: 'Sector 10, Main Road' },
         media: { imageUrl: '', videoUrl: '' },
-        reportedBy: 'u_aarav',
+        reportedBy: 'u_harsh',
         assignedTeam: 'Unassigned',
         trustScore: 0,
         aiAnalysis: { categoryConfidence: 0.96, duplicateChecked: true, possibleDuplicateOf: null, smartSummary: 'Open manhole cover', hotspotScore: 2 },
@@ -131,7 +143,7 @@ export const seedDatabase = async () => {
         status: 'Resolved',
         location: { latitude: 28.6150, longitude: 77.2110, address: 'Sector 8, Park Street' },
         media: { imageUrl: '', videoUrl: '' },
-        reportedBy: 'u_aarav',
+        reportedBy: 'u_harsh',
         assignedTeam: 'Electricity Dept',
         trustScore: 100,
         aiAnalysis: { categoryConfidence: 0.89, duplicateChecked: true, possibleDuplicateOf: null, smartSummary: 'Streetlight not working', hotspotScore: 1 },
@@ -141,26 +153,36 @@ export const seedDatabase = async () => {
 
       store.issues = [i1, i2, i3, i4, i5];
 
-      const v1 = { _id: 'v1', issueId: 'i_pothole', userId: 'u_rohan', role: 'volunteer', status: 'Verify', comments: 'Verified, it is huge.', createdAt: new Date().toISOString() };
-      const v2 = { _id: 'v2', issueId: 'i_leakage', userId: 'u_rohan', role: 'volunteer', status: 'Verify', comments: 'Confirmed, leaking water.', createdAt: new Date().toISOString() };
+      const v1 = { _id: 'v1', issueId: 'i_pothole', userId: 'u_yash', role: 'volunteer', status: 'Verify', comments: 'Verified, it is huge.', createdAt: new Date().toISOString() };
+      const v2 = { _id: 'v2', issueId: 'i_leakage', userId: 'u_yash', role: 'volunteer', status: 'Verify', comments: 'Confirmed, leaking water.', createdAt: new Date().toISOString() };
       store.verifications = [v1, v2];
 
-      const n1 = { _id: 'n1', userId: 'u_aarav', title: 'Points Earned!', message: 'Riya verified an issue you reported. +5 points earned.', type: 'info', read: false, createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString() };
-      const n2 = { _id: 'n2', userId: 'u_aarav', title: 'Issue Reported!', message: 'Aarav reported an issue. +10 points earned.', type: 'success', read: false, createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString() };
-      const n3 = { _id: 'n3', userId: 'u_aarav', title: 'Issue Resolved!', message: 'Garbage pile resolved. +20 points earned.', type: 'success', read: true, createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() };
+      const n1 = { _id: 'n1', userId: 'u_harsh', title: 'Points Earned!', message: 'Yash Foundation verified an issue you reported. +5 points earned.', type: 'info', read: false, createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString() };
+      const n2 = { _id: 'n2', userId: 'u_harsh', title: 'Issue Reported!', message: 'Harsh reported an issue. +10 points earned.', type: 'success', read: false, createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString() };
+      const n3 = { _id: 'n3', userId: 'u_harsh', title: 'Issue Resolved!', message: 'Garbage pile resolved. +20 points earned.', type: 'success', read: true, createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() };
       store.notifications = [n1, n2, n3];
 
       saveStore(store);
-      console.log('✅ Local JSON database seeded successfully.');
+      console.log('✅ Local JSON database seeded successfully with custom users.');
     } else {
+      // Clear old seed data if present in MongoDB
+      const oldUserExists = await User.findOne({ email: 'aarav@civic.com' });
+      if (oldUserExists) {
+        console.log('🧹 Clearing old MongoDB seed data...');
+        await User.deleteMany({});
+        await Issue.deleteMany({});
+        await Verification.deleteMany({});
+        await Notification.deleteMany({});
+      }
+
       const userCount = await User.countDocuments({});
       if (userCount > 0) return; // Already seeded
 
-      console.log('🌱 Seeding MongoDB database...');
+      console.log('🌱 Seeding MongoDB database with custom users...');
 
-      const u1 = await User.create({ name: 'Aarav Sharma', email: 'aarav@civic.com', phone: '9876543210', password: hashedPassword, role: 'citizen', points: 250, rank: 15, badges: ['Community Reporter', 'Problem Solver', 'Active Citizen', 'Top Contributor'] });
-      const u2 = await User.create({ name: 'Rohan Mehta', email: 'volunteer@civic.com', phone: '9876543211', password: hashedPassword, role: 'volunteer', points: 180, rank: 8, badges: ['Active Citizen', 'Community Validator'] });
-      const u3 = await User.create({ name: 'Admin Controller', email: 'admin@civic.com', phone: '9876543212', password: hashedPassword, role: 'admin', points: 0, rank: 0, badges: [] });
+      const u1 = await User.create({ name: 'Harsh Savnerkar', email: 'harsh@citizen.com', phone: '9876543210', password: hashCitizen, role: 'citizen', points: 250, rank: 15, badges: ['Community Reporter', 'Problem Solver', 'Active Citizen', 'Top Contributor'] });
+      const u2 = await User.create({ name: 'Yash Foundation', email: 'yashfoundation@volunteer.com', phone: '9876543211', password: hashVolunteer, role: 'volunteer', points: 180, rank: 8, badges: ['Active Citizen', 'Community Validator'] });
+      const u3 = await User.create({ name: 'Tejas Controller', email: 'tejas@admin.com', phone: '9876543212', password: hashAdmin, role: 'admin', points: 0, rank: 0, badges: [] });
 
       const i1 = await Issue.create({ title: 'Pothole on main road', description: 'Large, dangerous pothole near the roundabout blocking traffic.', category: 'Pothole', priority: 'High', status: 'In Progress', location: { latitude: 28.6145, longitude: 77.2085, address: 'Sector 15, Main Road' }, reportedBy: u1._id, assignedTeam: 'Public Works Division', trustScore: 85, aiAnalysis: { categoryConfidence: 0.94, duplicateChecked: true, smartSummary: 'Pothole on main road', hotspotScore: 1 } });
       const i2 = await Issue.create({ title: 'Water leakage', description: 'Clean drinking water leaking from underground joint.', category: 'Water Leakage', priority: 'High', status: 'Assigned', location: { latitude: 28.6120, longitude: 77.2100, address: 'Sector 12, Near School' }, reportedBy: u1._id, assignedTeam: 'Water & Sewage Board', trustScore: 90, aiAnalysis: { categoryConfidence: 0.91, duplicateChecked: true, smartSummary: 'Water leakage', hotspotScore: 1 } });
@@ -171,11 +193,11 @@ export const seedDatabase = async () => {
       await Verification.create({ issueId: i1._id, userId: u2._id, role: 'volunteer', status: 'Verify', comments: 'Verified, it is huge.' });
       await Verification.create({ issueId: i2._id, userId: u2._id, role: 'volunteer', status: 'Verify', comments: 'Confirmed, leaking water.' });
 
-      await Notification.create({ userId: u1._id, title: 'Points Earned!', message: 'Riya verified an issue you reported. +5 points earned.', type: 'info', read: false });
-      await Notification.create({ userId: u1._id, title: 'Issue Reported!', message: 'Aarav reported an issue. +10 points earned.', type: 'success', read: false });
+      await Notification.create({ userId: u1._id, title: 'Points Earned!', message: 'Yash Foundation verified an issue you reported. +5 points earned.', type: 'info', read: false });
+      await Notification.create({ userId: u1._id, title: 'Issue Reported!', message: 'Harsh reported an issue. +10 points earned.', type: 'success', read: false });
       await Notification.create({ userId: u1._id, title: 'Issue Resolved!', message: 'Garbage pile resolved. +20 points earned.', type: 'success', read: true });
 
-      console.log('✅ MongoDB database seeded successfully.');
+      console.log('✅ MongoDB database seeded successfully with custom users.');
     }
   } catch (error) {
     console.error('❌ Failed to seed database:', error);

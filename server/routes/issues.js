@@ -676,4 +676,110 @@ router.post('/merge', protect, authorize('admin'), async (req, res) => {
   }
 });
 
+// @desc    Toggle like on an issue
+// @route   POST /api/issues/:id/like
+// @access  Private
+router.post('/:id/like', protect, async (req, res) => {
+  const issueId = req.params.id;
+  const userId = req.user._id.toString();
+
+  if (global.dbFallback) {
+    const store = getStore();
+    const issue = store.issues.find(i => i._id === issueId);
+    if (!issue) {
+      return res.status(404).json({ message: 'Issue not found' });
+    }
+
+    if (!issue.likes) issue.likes = [];
+    
+    const index = issue.likes.indexOf(userId);
+    let liked = false;
+    if (index > -1) {
+      issue.likes.splice(index, 1);
+    } else {
+      issue.likes.push(userId);
+      liked = true;
+    }
+
+    saveStore(store);
+    res.json({ likes: issue.likes, likesCount: issue.likes.length, liked });
+  } else {
+    try {
+      const issue = await Issue.findById(issueId);
+      if (!issue) {
+        return res.status(404).json({ message: 'Issue not found' });
+      }
+
+      if (!issue.likes) issue.likes = [];
+
+      const index = issue.likes.indexOf(req.user._id);
+      let liked = false;
+      if (index > -1) {
+        issue.likes.splice(index, 1);
+      } else {
+        issue.likes.push(req.user._id);
+        liked = true;
+      }
+
+      await issue.save();
+      res.json({ likes: issue.likes, likesCount: issue.likes.length, liked });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+});
+
+// @desc    Add comment on an issue
+// @route   POST /api/issues/:id/comment
+// @access  Private
+router.post('/:id/comment', protect, async (req, res) => {
+  const issueId = req.params.id;
+  const { text } = req.body;
+
+  if (!text || !text.trim()) {
+    return res.status(400).json({ message: 'Comment text is required' });
+  }
+
+  const commentObj = {
+    _id: 'c_' + Math.random().toString(36).substr(2, 9),
+    userId: req.user._id,
+    userName: req.user.name,
+    text: text.trim(),
+    createdAt: new Date().toISOString()
+  };
+
+  if (global.dbFallback) {
+    const store = getStore();
+    const issue = store.issues.find(i => i._id === issueId);
+    if (!issue) {
+      return res.status(404).json({ message: 'Issue not found' });
+    }
+
+    if (!issue.comments) issue.comments = [];
+    issue.comments.push(commentObj);
+
+    saveStore(store);
+    res.json({ comments: issue.comments });
+  } else {
+    try {
+      const issue = await Issue.findById(issueId);
+      if (!issue) {
+        return res.status(404).json({ message: 'Issue not found' });
+      }
+
+      if (!issue.comments) issue.comments = [];
+      issue.comments.push({
+        userId: req.user._id,
+        userName: req.user.name,
+        text: text.trim()
+      });
+
+      await issue.save();
+      res.json({ comments: issue.comments });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+});
+
 export default router;
