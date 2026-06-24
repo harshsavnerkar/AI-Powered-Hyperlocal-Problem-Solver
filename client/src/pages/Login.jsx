@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Mail, Lock, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import loginIllustration from '../assets/login_illustration.png';
 
 const Login = () => {
   const { login, error: authError } = useAuth();
@@ -59,37 +60,25 @@ const Login = () => {
         </div>
 
         {/* Hero Illustration Block */}
-        <div className="my-auto space-y-6 z-10 max-w-lg">
-          <h2 className="text-4xl xl:text-5xl font-extrabold tracking-tight leading-tight font-sans">
-            Together, <br />
-            We Build Better <br />
-            <span className="text-emerald-200">Communities</span>
-          </h2>
-          <p className="text-emerald-50 dark:text-emerald-100 text-sm leading-relaxed max-w-sm">
-            Report issues, track progress, and make your community a better place to live.
-          </p>
+        <div className="my-auto space-y-6 z-10 max-w-lg flex-1 flex flex-col justify-between mt-8">
+          <div>
+            <h2 className="text-4xl xl:text-5xl font-extrabold tracking-tight leading-tight font-sans">
+              Together, <br />
+              We Build Better <br />
+              <span className="text-emerald-200">Communities</span>
+            </h2>
+            <p className="text-emerald-50 dark:text-emerald-100 text-sm leading-relaxed max-w-sm mt-3">
+              Report issues, track progress, and make your community a better place to live.
+            </p>
+          </div>
 
-          {/* Premium city mockup container */}
-          <div className="mt-8 relative h-64 w-full rounded-2xl bg-white/10 dark:bg-slate-900/30 backdrop-blur-md border border-white/20 dark:border-white/10 p-6 flex flex-col justify-between shadow-2xl">
-            <div className="flex gap-2">
-              <span className="h-3 w-3 rounded-full bg-red-400" />
-              <span className="h-3 w-3 rounded-full bg-yellow-400" />
-              <span className="h-3 w-3 rounded-full bg-green-400" />
-            </div>
-            {/* Visual SaaS mock grid inside Left panel */}
-            <div className="flex-1 flex flex-col justify-center items-center gap-4">
-              <div className="h-10 w-4/5 rounded-lg bg-white/20 animate-pulse flex items-center justify-between px-3 text-xs">
-                <span>📍 Sector 15 Pothole</span>
-                <span className="bg-red-500/80 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">Critical</span>
-              </div>
-              <div className="h-10 w-4/5 rounded-lg bg-white/20 animate-pulse flex items-center justify-between px-3 text-xs">
-                <span>📍 Sector 12 Water Leak</span>
-                <span className="bg-yellow-500/80 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">Assigned</span>
-              </div>
-            </div>
-            <div className="text-right text-[10px] font-bold text-emerald-200 uppercase tracking-widest">
-              CIVIC MONITOR v1.0
-            </div>
+          {/* Real Illustration Image */}
+          <div className="mt-6 relative w-full flex-grow flex items-end">
+            <img 
+              src={loginIllustration} 
+              alt="Community Hero Login Illustration" 
+              className="w-full object-contain max-h-[380px] rounded-2xl" 
+            />
           </div>
         </div>
 
