@@ -15,6 +15,13 @@
   --color-admin: #7c3aed;
   --color-admin-dark: #4c1d95;
   
+  --color-dark-bg: #0b1317;
+  --color-dark-sidebar: #090e11;
+  --color-dark-card: #0f1a20;
+  --color-dark-border: #182830;
+  --color-dark-text-muted: #8a9da6;
+  --color-dark-active-bg: #0c231a;
+  
   --font-sans: 'Inter', 'Outfit', sans-serif;
 }
 
@@ -23,8 +30,8 @@
     @apply font-sans bg-gray-50 text-gray-900 transition-colors duration-200;
   }
   
-  body.dark {
-    @apply bg-slate-950 text-slate-100;
+  .dark body {
+    @apply bg-[#0b1317] text-white;
   }
 }
 
