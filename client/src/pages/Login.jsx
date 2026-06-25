@@ -96,7 +96,7 @@ const Login = () => {
   const handleGoogleClickFallback = () => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
     if (!clientId) {
-      alert('📢 Google OAuth Client ID is not configured.\n\nTo run real Google Login, please set VITE_GOOGLE_CLIENT_ID in client/.env.\n\nRunning in Simulation Mode to demonstrate the signup redirection flow...');
+      console.info('📢 Google OAuth Client ID is not configured in client/.env. Running in Simulation Mode to demonstrate the signup redirection flow.');
     }
     handleGoogleCallback('simulated_google_token');
   };
