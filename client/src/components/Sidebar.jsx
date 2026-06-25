@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import appLogo from '../assets/logo.jpg';
 import { 
   LayoutDashboard, 
   AlertTriangle, 
@@ -100,15 +101,13 @@ const Sidebar = () => {
   return (
     <aside className="w-64 border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-screen shrink-0 transition-colors duration-200">
       {/* Sidebar Header / Logo */}
-      <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center gap-3">
-        <div className={`p-2 rounded-lg ${branding.logoBg}`}>
-          <ShieldCheck size={24} />
-        </div>
+      <div className="p-5 border-b border-gray-100 dark:border-slate-850 flex items-center gap-3.5">
+        <img src={appLogo} alt="CommunityHero Logo" className="h-9 w-auto rounded-lg shadow-sm border border-gray-105 dark:border-slate-800/85 shrink-0" />
         <div>
-          <span className="font-extrabold text-xl tracking-tight text-gray-900 dark:text-white block font-sans">
-            Civic<span className={branding.logo}>AI</span>
+          <span className="font-black text-sm tracking-tight text-gray-905 dark:text-white block font-sans leading-none">
+            Community<span className="text-emerald-500">Hero</span>
           </span>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400 block -mt-1">
+          <span className="text-[9px] font-bold uppercase tracking-widest text-gray-400 mt-1 block">
             {role} PORTAL
           </span>
         </div>

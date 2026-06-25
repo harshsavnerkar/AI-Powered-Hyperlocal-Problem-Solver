@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import appLogo from '../assets/logo.jpg';
 import { 
   User, 
   Mail, 
@@ -224,12 +225,10 @@ const Signup = () => {
         {/* Left split panel - Illustration & Benefits list */}
         <div className="hidden lg:flex lg:w-1/2 bg-emerald-50/50 dark:bg-slate-900 border-r border-gray-150 dark:border-slate-800 flex-col justify-between p-10 relative overflow-hidden">
         {/* Header Logo */}
-        <div className="flex items-center gap-3 z-10">
-          <div className="p-2 bg-emerald-600 text-white rounded-lg">
-            <ShieldAlert size={24} />
-          </div>
-          <span className="font-extrabold text-2xl tracking-tight text-gray-900 dark:text-white font-sans">
-            Community <span className="text-emerald-600">Hero</span>
+        <div className="flex items-center gap-3.5 z-10">
+          <img src={appLogo} alt="CommunityHero Logo" className="h-10 w-auto rounded-xl border border-emerald-500/25 shadow-sm shrink-0" />
+          <span className="font-black text-2xl tracking-tight text-gray-955 dark:text-white font-sans leading-none">
+            Community<span className="text-emerald-500">Hero</span>
           </span>
         </div>
 
