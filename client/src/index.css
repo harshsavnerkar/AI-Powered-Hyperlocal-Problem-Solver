@@ -49,15 +49,7 @@
   border: 1px solid #182830;
 }
 
-/* Sidebar Custom Active Overrides */
-.dark aside a.active {
-  background-color: #0c231a !important;
-  color: #10b981 !important;
-  border-right: none !important;
-}
-.dark aside a.active svg {
-  color: #10b981 !important;
-}
+
 
 /* Decorative Background Grid Pattern */
 .bg-grid-pattern {

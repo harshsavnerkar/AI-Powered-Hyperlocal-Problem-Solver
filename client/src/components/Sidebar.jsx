@@ -31,24 +31,24 @@ const Sidebar = () => {
   const branding = {
     citizen: {
       accent: 'bg-emerald-500 hover:bg-emerald-600 text-white',
-      activeText: 'text-emerald-600 dark:text-emerald-400',
-      activeBg: 'bg-emerald-50 dark:bg-emerald-950/30 border-r-4 border-emerald-500',
+      activeText: 'text-emerald-600 dark:text-[#10b981]',
+      activeBg: 'bg-emerald-50 dark:bg-[#0c231a] border-r-4 border-emerald-500 dark:border-r-0',
       logo: 'text-emerald-500',
-      logoBg: 'bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400'
+      logoBg: 'bg-emerald-100 dark:bg-[#0c231a] text-emerald-600 dark:text-[#10b981]'
     },
     volunteer: {
       accent: 'bg-blue-600 hover:bg-blue-700 text-white',
-      activeText: 'text-blue-600 dark:text-blue-400',
-      activeBg: 'bg-blue-50 dark:bg-blue-950/30 border-r-4 border-blue-600',
+      activeText: 'text-blue-600 dark:text-[#3b82f6]',
+      activeBg: 'bg-blue-50 dark:bg-[#0c1a2f] border-r-4 border-blue-600 dark:border-r-0',
       logo: 'text-blue-600',
-      logoBg: 'bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+      logoBg: 'bg-blue-100 dark:bg-[#0c1a2f] text-blue-600 dark:text-[#3b82f6]'
     },
     admin: {
       accent: 'bg-violet-600 hover:bg-violet-700 text-white',
-      activeText: 'text-violet-600 dark:text-violet-400',
-      activeBg: 'bg-violet-50 dark:bg-violet-950/30 border-r-4 border-violet-600',
+      activeText: 'text-violet-600 dark:text-[#a855f7]',
+      activeBg: 'bg-violet-50 dark:bg-[#1f0f2e] border-r-4 border-violet-600 dark:border-r-0',
       logo: 'text-violet-600',
-      logoBg: 'bg-violet-100 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400'
+      logoBg: 'bg-violet-100 dark:bg-[#1f0f2e] text-violet-600 dark:text-[#a855f7]'
     }
   }[role];
 

@@ -18,9 +18,11 @@ import {
 } from 'recharts';
 import { TrendingUp, RefreshCw, Layers, Clock, AlertOctagon } from 'lucide-react';
 import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
+import { useTheme } from '../context/ThemeContext.jsx';
 
 const Analytics = () => {
   const { token } = useAuth();
+  const { darkMode } = useTheme();
   const [metrics, setMetrics] = useState({ totalIssues: 0, pendingIssues: 0, inProgressIssues: 0, resolvedIssues: 0, avgResolutionTime: '0 hrs' });
   const [charts, setCharts] = useState({ issuesByCategory: [], statusOverview: [], monthlyTrends: [], heatmapData: [], verificationStats: [] });
   const [loading, setLoading] = useState(true);
@@ -185,8 +187,11 @@ const Analytics = () => {
           <div className="h-64 rounded-xl border border-gray-150 dark:border-slate-800/80 overflow-hidden relative shadow-sm">
             <MapContainer center={mapCenter} zoom={13} key={`${mapCenter[0]}-${mapCenter[1]}`} className="h-full w-full">
               <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+                url={darkMode 
+                  ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                  : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                }
               />
               {charts.heatmapData?.map((item, idx) => (
                 <CircleMarker

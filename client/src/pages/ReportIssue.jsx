@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, API_BASE_URL } from '../context/AuthContext.jsx';
+import { useTheme } from '../context/ThemeContext.jsx';
 import { useNotifications } from '../context/NotificationContext.jsx';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
@@ -37,6 +38,7 @@ const MapClickHandler = ({ onMapClick }) => {
 
 const ReportIssue = () => {
   const { token, user, updateUserPoints } = useAuth();
+  const { darkMode } = useTheme();
   const { refreshNotifications } = useNotifications();
   const navigate = useNavigate();
 
@@ -336,8 +338,11 @@ const ReportIssue = () => {
             <div className="h-48 rounded-2xl border border-gray-200 dark:border-slate-800 overflow-hidden relative shadow-sm">
               <MapContainer center={[latitude, longitude]} zoom={15} scrollWheelZoom={false}>
                 <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+                  url={darkMode 
+                    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                  }
                 />
                 <Marker position={[latitude, longitude]} />
                 <MapClickHandler onMapClick={handleMapSelection} />
