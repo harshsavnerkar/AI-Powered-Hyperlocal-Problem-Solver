@@ -47,16 +47,16 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950 text-gray-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="flex h-screen overflow-hidden bg-gradient-to-tr from-slate-50 via-[#f0faf5] to-[#f5f9fc] dark:from-[#0b1317] dark:via-[#071610] dark:to-[#0b1216] text-gray-900 dark:text-slate-100 transition-colors duration-200">
       {/* Sidebar navigation */}
       <Sidebar />
 
       {/* Main panel */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
         {/* Background Decorative Patterns */}
-        <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0 opacity-70" />
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-400/8 dark:bg-emerald-500/5 blur-[120px] pointer-events-none z-0" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400/8 dark:bg-blue-500/5 blur-[150px] pointer-events-none z-0" />
+        <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0 opacity-80" />
+        <div className="absolute top-[-10%] right-[-10%] w-[55%] h-[55%] rounded-full bg-emerald-400/12 dark:bg-emerald-500/5 blur-[120px] pointer-events-none z-0" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[65%] h-[65%] rounded-full bg-blue-400/10 dark:bg-blue-500/5 blur-[150px] pointer-events-none z-0" />
 
         <Header title={getPageTitle()} />
 
