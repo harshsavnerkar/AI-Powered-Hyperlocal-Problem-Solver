@@ -5,6 +5,7 @@ import { Mail, Lock, Eye, EyeOff, ShieldAlert } from 'lucide-react';
 import loginIllustration from '../assets/login_illustration.png';
 import appLogo from '../assets/logo.jpg';
 import OtpModal from '../components/OtpModal.jsx';
+import { motion } from 'framer-motion';
 
 const Login = () => {
   const { login, googleLogin, verifyLoginOtp, error: authError } = useAuth();
@@ -135,7 +136,13 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 md:p-8 transition-colors duration-200">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 md:p-8 transition-colors duration-200"
+    >
       <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-150 dark:border-slate-800 flex flex-col lg:flex-row min-h-[600px] lg:min-h-[680px]">
         {/* Left split panel - Illustration */}
         <div className="hidden lg:flex lg:w-1/2 bg-emerald-50/50 dark:bg-slate-900 border-r border-gray-150 dark:border-slate-800 flex-col justify-between p-10 relative overflow-hidden">
@@ -161,11 +168,11 @@ const Login = () => {
             </div>
 
             {/* Real Illustration Image */}
-            <div className="mt-6 relative w-full flex-grow flex items-end">
+            <div className="relative w-full rounded-2xl overflow-hidden mt-6">
               <img 
                 src={loginIllustration} 
                 alt="Community Hero Login Illustration" 
-                className="w-full object-contain max-h-[340px] rounded-2xl" 
+                className="w-full object-contain max-h-[280px]" 
               />
             </div>
           </div>
@@ -283,9 +290,11 @@ const Login = () => {
 
           {/* Google Button Container */}
           <div className="w-full flex flex-col items-center justify-center min-h-[46px] mt-1">
-            {googleScriptLoaded ? (
-              <div id="google-signin-button" className="w-full flex justify-center"></div>
-            ) : (
+            <div 
+              id="google-signin-button" 
+              className={`w-full flex justify-center ${googleScriptLoaded ? 'block' : 'hidden'}`}
+            ></div>
+            {!googleScriptLoaded && (
               <button
                 onClick={handleGoogleClickFallback}
                 type="button"
@@ -323,7 +332,7 @@ const Login = () => {
         error={otpError}
         onResend={handleResendOtp}
       />
-    </div>
+    </motion.div>
   );
 };
 

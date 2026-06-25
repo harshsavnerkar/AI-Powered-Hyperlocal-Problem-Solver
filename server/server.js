@@ -9,6 +9,12 @@ import fs from 'fs';
 import { connectDB } from './config/db.js';
 import { seedDatabase } from './data/seed.js';
 
+// Models for cleanup
+import User from './models/User.js';
+import Issue from './models/Issue.js';
+import Verification from './models/Verification.js';
+import Notification from './models/Notification.js';
+
 // Route files
 import authRoutes from './routes/auth.js';
 import issueRoutes from './routes/issues.js';
@@ -54,7 +60,19 @@ const PORT = process.env.PORT || 5000;
 
 // Connect to Database first, then spin up server
 connectDB().then(async () => {
-  await seedDatabase();
+  if (!global.dbFallback) {
+    try {
+      console.log('🧹 Clearing MongoDB collections for fresh test...');
+      await User.deleteMany({});
+      await Issue.deleteMany({});
+      await Verification.deleteMany({});
+      await Notification.deleteMany({});
+      console.log('✅ MongoDB collections cleared.');
+    } catch (err) {
+      console.error('Failed to clear MongoDB collections:', err);
+    }
+  }
+  // await seedDatabase();
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT} in ${global.dbFallback ? 'Local JSON Fallback' : 'MongoDB'} mode`);
   });

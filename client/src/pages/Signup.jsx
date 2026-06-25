@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import appLogo from '../assets/logo.jpg';
+import { motion } from 'framer-motion';
 import { 
   User, 
   Mail, 
@@ -42,7 +43,7 @@ const Signup = () => {
         alert('📢 You already have an account! Logging you in...');
         navigate('/dashboard');
       } else {
-        alert('📢 Google authentication successful!\n\nPlease enter your Phone Number, create a Password, and select your Role to finish creating your account.');
+        alert('📢 Google authentication successful!\n\nPlease enter your Phone Number and select your Role to finish creating your account.');
       }
     } catch (err) {
       setLocalError(err.message || 'Google Sign-In failed');
@@ -150,14 +151,20 @@ const Signup = () => {
     e.preventDefault();
     setLocalError('');
 
-    if (!name || !email || !phone || !password || !confirmPassword || !role) {
-      setLocalError('Please fill in all fields');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setLocalError('Passwords do not match');
-      return;
+    if (isGoogleRegistered) {
+      if (!name || !email || !phone || !role) {
+        setLocalError('Please fill in all fields');
+        return;
+      }
+    } else {
+      if (!name || !email || !phone || !password || !confirmPassword || !role) {
+        setLocalError('Please fill in all fields');
+        return;
+      }
+      if (password !== confirmPassword) {
+        setLocalError('Passwords do not match');
+        return;
+      }
     }
 
     if (!agreeTerms) {
@@ -169,7 +176,7 @@ const Signup = () => {
     try {
       if (isGoogleRegistered) {
         // Bypass OTP for verified Google emails
-        await signup({ name, email, phone, password, role, isGoogle: true });
+        await signup({ name, email, phone, password: '', role, isGoogle: true });
         navigate('/dashboard');
       } else {
         // Send OTP for manual signup
@@ -220,7 +227,13 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 md:p-8 transition-colors duration-200">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -15 }}
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 md:p-8 transition-colors duration-200"
+    >
       <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-150 dark:border-slate-800 flex flex-col lg:flex-row min-h-[600px] lg:min-h-[680px]">
         {/* Left split panel - Illustration & Benefits list */}
         <div className="hidden lg:flex lg:w-1/2 bg-emerald-50/50 dark:bg-slate-900 border-r border-gray-150 dark:border-slate-800 flex-col justify-between p-10 relative overflow-hidden">
@@ -387,77 +400,83 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Password */}
-            <div className="space-y-1.5">
-              <label htmlFor="password" className="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide">
-                Password
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none">
-                  <Lock size={16} />
-                </span>
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="Create a password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-xs shadow-sm transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-white"
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
+            {!isGoogleRegistered && (
+              <>
+                {/* Password */}
+                <div className="space-y-1.5">
+                  <label htmlFor="password" className="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none">
+                      <Lock size={16} />
+                    </span>
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      placeholder="Create a password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="block w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-xs shadow-sm transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
 
-            {/* Confirm Password */}
-            <div className="space-y-1.5">
-              <label htmlFor="confirmPassword" className="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none">
-                  <Lock size={16} />
-                </span>
-                <input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  placeholder="Confirm password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-xs shadow-sm transition-all"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-white"
-                >
-                  {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
+                {/* Confirm Password */}
+                <div className="space-y-1.5">
+                  <label htmlFor="confirmPassword" className="block text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wide">
+                    Confirm Password
+                  </label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none">
+                      <Lock size={16} />
+                    </span>
+                    <input
+                      id="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      placeholder="Confirm password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="block w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 text-xs shadow-sm transition-all"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                    >
+                      {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
 
             {/* Password Strength Indicator */}
-            <div className="md:col-span-2 space-y-1">
-              <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase">
-                <span>Password Strength</span>
-                <span className={
-                  passwordStrength.text === 'Strong' ? 'text-emerald-500' :
-                  passwordStrength.text === 'Medium' ? 'text-amber-500' : 'text-red-500'
-                }>{passwordStrength.text}</span>
+            {!isGoogleRegistered && (
+              <div className="md:col-span-2 space-y-1">
+                <div className="flex items-center justify-between text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase">
+                  <span>Password Strength</span>
+                  <span className={
+                    passwordStrength.text === 'Strong' ? 'text-emerald-500' :
+                    passwordStrength.text === 'Medium' ? 'text-amber-500' : 'text-red-500'
+                  }>{passwordStrength.text}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 h-1 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                  <div className={`h-full rounded-full transition-all duration-300 ${passwordStrength.score >= 1 ? passwordStrength.color : 'bg-transparent'}`} />
+                  <div className={`h-full rounded-full transition-all duration-300 ${passwordStrength.score >= 2 ? passwordStrength.color : 'bg-transparent'}`} />
+                  <div className={`h-full rounded-full transition-all duration-300 ${passwordStrength.score >= 3 ? passwordStrength.color : 'bg-transparent'}`} />
+                </div>
               </div>
-              <div className="grid grid-cols-3 gap-1.5 h-1 bg-gray-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                <div className={`h-full rounded-full transition-all duration-300 ${passwordStrength.score >= 1 ? passwordStrength.color : 'bg-transparent'}`} />
-                <div className={`h-full rounded-full transition-all duration-300 ${passwordStrength.score >= 2 ? passwordStrength.color : 'bg-transparent'}`} />
-                <div className={`h-full rounded-full transition-all duration-300 ${passwordStrength.score >= 3 ? passwordStrength.color : 'bg-transparent'}`} />
-              </div>
-            </div>
+            )}
 
             {/* Role Selection cards */}
             <div className="md:col-span-2 space-y-2 mt-2">
@@ -573,9 +592,11 @@ const Signup = () => {
 
           {/* Google Button Container */}
           <div className="w-full flex flex-col items-center justify-center min-h-[46px] mt-0.5">
-            {googleScriptLoaded ? (
-              <div id="google-signup-button" className="w-full flex justify-center"></div>
-            ) : (
+            <div 
+              id="google-signup-button" 
+              className={`w-full flex justify-center ${googleScriptLoaded ? 'block' : 'hidden'}`}
+            ></div>
+            {!googleScriptLoaded && (
               <button
                 onClick={handleGoogleClickFallback}
                 type="button"
@@ -613,7 +634,7 @@ const Signup = () => {
         error={otpError}
         onResend={handleResendOtp}
       />
-    </div>
+    </motion.div>
   );
 };
 
