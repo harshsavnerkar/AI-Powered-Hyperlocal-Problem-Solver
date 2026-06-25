@@ -53,10 +53,15 @@ const Layout = () => {
 
       {/* Main panel */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
+        {/* Background Decorative Patterns */}
+        <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0 opacity-70" />
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-emerald-400/8 dark:bg-emerald-500/5 blur-[120px] pointer-events-none z-0" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] rounded-full bg-blue-400/8 dark:bg-blue-500/5 blur-[150px] pointer-events-none z-0" />
+
         <Header title={getPageTitle()} />
 
         {/* Scrollable Page Outlet Content */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
+        <main className="flex-1 overflow-y-auto p-6 md:p-8 z-10 relative">
           <Outlet />
         </main>
       </div>
