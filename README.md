@@ -2,7 +2,7 @@
 
 **Community Hero** is a full-stack hyperlocal civic application designed to help citizens report, verify, track, and resolve local infrastructure issues like potholes, garbage piles, water leakages, streetlight failures, road damages, and safety hazards. 
 
-The application utilizes AI checks powered by the **Gemini API**, gamification systems (points, ranks, and unlockable badges), and Leaflet maps for geolocated hotspots and coordinate pin selections.
+The application utilizes AI checks powered by the **Gemini API**, gamification systems (points, ranks, and unlockable badges), and Leaflet maps for geolocated hotspots and coordinate pin select
 
 ---
 
