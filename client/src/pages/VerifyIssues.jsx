@@ -5,7 +5,7 @@ import { ShieldCheck, Check, X, MapPin, Calendar } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 const VerifyIssues = () => {
-  const { token, user, updateUserPoints } = useAuth();
+  const { token, user, updateUser } = useAuth();
   const { refreshNotifications } = useNotifications();
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -53,7 +53,16 @@ const VerifyIssues = () => {
 
       if (response.ok) {
         alert(`Successfully ${status.toLowerCase()}ed! You earned +5 points.`);
-        updateUserPoints(user.points + 5, user.badges);
+        
+        // Fetch latest profile from server to get updated points and badges
+        fetch(`${API_BASE_URL}/auth/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(profile => {
+          updateUser(profile);
+        })
+        .catch(err => console.error('Failed to sync profile after verify:', err));
         
         // Trigger verification confetti
         confetti({
