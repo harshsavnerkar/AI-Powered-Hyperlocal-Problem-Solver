@@ -29,6 +29,20 @@ router.post('/send-otp', async (req, res) => {
 
   try {
     const normalizedEmail = email.toLowerCase().trim();
+
+    // Check if user already exists
+    if (global.dbFallback) {
+      const store = getStore();
+      const userExists = store.users.find(u => u.email === normalizedEmail);
+      if (userExists) {
+        return res.status(400).json({ message: 'An account with this email already exists' });
+      }
+    } else {
+      const userExists = await User.findOne({ email: normalizedEmail });
+      if (userExists) {
+        return res.status(400).json({ message: 'An account with this email already exists' });
+      }
+    }
     // Generate 6-digit random code
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
