@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import { useAuth, API_BASE_URL } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
@@ -12,16 +12,30 @@ const MapView = () => {
   const [loading, setLoading] = useState(true);
   const [mapCenter, setMapCenter] = useState([28.6139, 77.2090]);
 
+  // Geolocation & Routing States
+  const [userLocation, setUserLocation] = useState(null);
+  const [routePath, setRoutePath] = useState(null);
+  const [routingTo, setRoutingTo] = useState(null);
+  const [routeInfo, setRouteInfo] = useState(null);
+  const [routingLoading, setRoutingLoading] = useState(false);
+
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setMapCenter([position.coords.latitude, position.coords.longitude]);
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+          setMapCenter([lat, lon]);
+          setUserLocation([lat, lon]);
         },
         (error) => {
           console.warn('Geolocation failed:', error);
+          // Set standard Delhi mock coordinates as default fallback location
+          setUserLocation([28.6139, 77.2090]);
         }
       );
+    } else {
+      setUserLocation([28.6139, 77.2090]);
     }
   }, []);
 
@@ -82,6 +96,66 @@ const MapView = () => {
     });
   };
 
+  // Create pulsing user marker DivIcon
+  const createUserIcon = () => {
+    return L.divIcon({
+      className: 'user-marker-icon',
+      html: `
+        <div class="relative flex items-center justify-center">
+          <div class="absolute h-8 w-8 rounded-full bg-blue-500 opacity-20 animate-ping"></div>
+          <div class="h-4 w-4 rounded-full bg-blue-600 border-2 border-white shadow-md relative z-10"></div>
+        </div>
+      `,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16]
+    });
+  };
+
+  // Fetch walking path from Open Source Routing Machine (OSRM)
+  const handleGetRoute = async (issue) => {
+    if (!userLocation) {
+      alert('Unable to determine your location. Please check browser permissions.');
+      return;
+    }
+    
+    setRoutingLoading(true);
+    try {
+      const userLat = userLocation[0];
+      const userLon = userLocation[1];
+      const issueLat = issue.location.latitude;
+      const issueLon = issue.location.longitude;
+
+      const url = `https://router.project-osrm.org/route/v1/walking/${userLon},${userLat};${issueLon},${issueLat}?overview=full&geometries=geojson`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch route');
+      
+      const data = await res.json();
+      if (data.routes && data.routes[0]) {
+        const route = data.routes[0];
+        const coords = route.geometry.coordinates.map(coord => [coord[1], coord[0]]); // [lat, lon]
+        setRoutePath(coords);
+        setRoutingTo(issue);
+        setRouteInfo({
+          distance: (route.distance / 1000).toFixed(2), // km
+          duration: Math.round(route.duration / 60) // minutes
+        });
+      } else {
+        alert('No walking route path could be found to this issue.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to calculate walking directions. Please try again.');
+    } finally {
+      setRoutingLoading(false);
+    }
+  };
+
+  const handleClearRoute = () => {
+    setRoutePath(null);
+    setRoutingTo(null);
+    setRouteInfo(null);
+  };
+
   if (loading) {
     return <div className="p-8 text-center text-xs text-gray-400 animate-pulse">Loading Map coordinates...</div>;
   }
@@ -99,6 +173,39 @@ const MapView = () => {
         </div>
       </div>
 
+      {/* Floating Directions Panel */}
+      {routingTo && routeInfo && (
+        <div className="absolute top-5 right-5 bg-white/95 dark:bg-slate-900/95 p-4 rounded-2xl border border-gray-250/50 dark:border-slate-800/80 shadow-2xl z-20 max-w-xs text-xs space-y-3 font-sans transition-all">
+          <div className="flex justify-between items-start gap-4">
+            <div>
+              <span className="block text-[8px] text-emerald-600 dark:text-emerald-400 font-extrabold uppercase tracking-wider">
+                Walking Directions
+              </span>
+              <h4 className="font-bold text-gray-900 dark:text-white truncate max-w-[160px]">
+                {routingTo.title}
+              </h4>
+            </div>
+            <button
+              onClick={handleClearRoute}
+              className="text-gray-400 hover:text-gray-650 dark:hover:text-white text-xs font-bold cursor-pointer"
+            >
+              Clear
+            </button>
+          </div>
+          <div className="flex justify-between items-center bg-gray-50 dark:bg-slate-950 p-2.5 rounded-xl border border-gray-150/40 dark:border-slate-800/40">
+            <div>
+              <span className="block text-[8px] text-gray-400 uppercase tracking-widest">Distance</span>
+              <span className="font-extrabold text-sm text-gray-900 dark:text-white font-sans">{routeInfo.distance} km</span>
+            </div>
+            <div className="h-6 border-r border-gray-200 dark:border-slate-800" />
+            <div>
+              <span className="block text-[8px] text-gray-400 uppercase tracking-widest">Est. Time</span>
+              <span className="font-extrabold text-sm text-gray-900 dark:text-white font-sans">{routeInfo.duration} mins</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <MapContainer center={mapCenter} zoom={14} key={`${mapCenter[0]}-${mapCenter[1]}`} className="h-full w-full">
         <TileLayer
           attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -107,6 +214,26 @@ const MapView = () => {
             : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
           }
         />
+
+        {/* User Current Location Pulse Dot */}
+        {userLocation && (
+          <Marker position={userLocation} icon={createUserIcon()}>
+            <Popup>
+              <div className="text-center font-bold text-xs text-blue-600">You are here</div>
+            </Popup>
+          </Marker>
+        )}
+
+        {/* Route Polyline Path */}
+        {routePath && (
+          <Polyline 
+            positions={routePath} 
+            color="#10b981" 
+            weight={4} 
+            dashArray="6, 6" 
+          />
+        )}
+
         {issues.map((issue) => {
           if (!issue.location?.latitude || !issue.location?.longitude) return null;
           return (
@@ -137,10 +264,22 @@ const MapView = () => {
                     >
                       {issue.priority}
                     </span>
-                    <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-600 text-[8px] font-bold uppercase tracking-wider">
+                    <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-650 text-[8px] font-bold uppercase tracking-wider">
                       {issue.status}
                     </span>
                   </div>
+                  
+                  {/* Get walking directions route button */}
+                  {userLocation && (
+                    <button
+                      disabled={routingLoading}
+                      onClick={() => handleGetRoute(issue)}
+                      className="w-full mt-2 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-450 text-white font-bold text-[9px] rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1 shadow-sm"
+                    >
+                      <MapPin size={9} />
+                      {routingLoading ? 'Calculating...' : 'Get Directions'}
+                    </button>
+                  )}
                 </div>
               </Popup>
             </Marker>
