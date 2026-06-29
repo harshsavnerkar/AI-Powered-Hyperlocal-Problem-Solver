@@ -188,7 +188,21 @@ const VolunteerDashboard = () => {
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="h-16 w-16 rounded-xl bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 flex items-center justify-center text-2xl shrink-0 overflow-hidden">
                         {issue.media?.imageUrl ? (
-                          <img src={`${API_BASE_URL.replace('/api', '')}${issue.media.imageUrl}`} alt={issue.title} className="h-full w-full object-cover" />
+                          <img 
+                            src={issue.media.imageUrl.startsWith('http') ? issue.media.imageUrl : `${API_BASE_URL.replace('/api', '')}${issue.media.imageUrl}`} 
+                            alt={issue.title} 
+                            className="h-full w-full object-cover" 
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              const emoji = 
+                                issue.category === 'Pothole' ? '🕳️' :
+                                issue.category === 'Garbage' ? '🗑️' :
+                                issue.category === 'Water Leakage' ? '💧' :
+                                issue.category === 'Streetlight' ? '💡' : '⚠️';
+                              const textNode = document.createTextNode(emoji);
+                              e.target.parentNode.appendChild(textNode);
+                            }}
+                          />
                         ) : (
                           issue.category === 'Pothole' ? '🕳️' :
                           issue.category === 'Garbage' ? '🗑️' :

@@ -24,14 +24,41 @@ import {
   MapPin,
   TrendingDown
 } from 'lucide-react';
+import { MapContainer, TileLayer, CircleMarker } from 'react-leaflet';
+import { useTheme } from '../context/ThemeContext.jsx';
 
 const AdminDashboard = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
+  const { darkMode } = useTheme();
   
   const [metrics, setMetrics] = useState({ totalIssues: 0, pendingIssues: 0, inProgressIssues: 0, resolvedIssues: 0, avgResolutionTime: '0 hrs' });
   const [charts, setCharts] = useState({ issuesByCategory: [], statusOverview: [], monthlyTrends: [], heatmapData: [] });
   const [aiInsights, setAiInsights] = useState({ hotspots: [], predictiveAlerts: [], risingCategories: [] });
+  
+  const [mapCenter, setMapCenter] = useState([28.6139, 77.2090]);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setMapCenter([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.warn('Dashboard geolocation failed:', error);
+        }
+      );
+    }
+  }, []);
+
+  useEffect(() => {
+    if (charts.heatmapData && charts.heatmapData.length > 0 && mapCenter[0] === 28.6139 && mapCenter[1] === 77.2090) {
+      const firstItem = charts.heatmapData[0];
+      if (firstItem && firstItem.latitude && firstItem.longitude) {
+        setMapCenter([firstItem.latitude, firstItem.longitude]);
+      }
+    }
+  }, [charts.heatmapData, mapCenter]);
   
   const [recentIssues, setRecentIssues] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -129,29 +156,38 @@ const AdminDashboard = () => {
         <div className="lg:col-span-2 glass rounded-2xl p-6 shadow-sm flex flex-col justify-between">
           <div>
             <h3 className="font-extrabold text-sm text-gray-900 dark:text-white uppercase tracking-wider mb-4">Issue Heatmap</h3>
-            {/* Visual Canvas Heatmap */}
-            <div className="h-64 bg-slate-100 dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl relative overflow-hidden flex items-center justify-center p-4">
-              {/* Mock map outline sketch */}
-              <div className="absolute inset-0 opacity-15 bg-[radial-gradient(#ccc_1px,transparent_1px)] [background-size:16px_16px] dark:bg-[radial-gradient(#334155_1px,transparent_1px)]" />
-              <div className="absolute top-20 left-1/4 h-24 w-40 border border-gray-300 dark:border-slate-800 rounded-lg transform -rotate-12 border-dashed flex items-center justify-center text-[10px] text-gray-400 font-bold uppercase">Sector 10</div>
-              <div className="absolute bottom-12 right-1/4 h-24 w-40 border border-gray-300 dark:border-slate-800 rounded-lg transform rotate-6 border-dashed flex items-center justify-center text-[10px] text-gray-400 font-bold uppercase">Sector 15</div>
-              
-              {/* Heat spots (matching visual mock circles!) */}
-              <div className="absolute top-24 left-1/3 h-16 w-16 bg-red-500/30 dark:bg-red-500/20 rounded-full blur-xl animate-pulse" />
-              <div className="absolute top-28 left-[35%] h-6 w-6 bg-red-600 rounded-full border-2 border-white dark:border-slate-800 shadow" />
-              
-              <div className="absolute bottom-16 right-1/3 h-20 w-20 bg-red-500/30 dark:bg-red-500/20 rounded-full blur-xl animate-pulse" />
-              <div className="absolute bottom-20 right-[38%] h-6 w-6 bg-red-600 rounded-full border-2 border-white dark:border-slate-800 shadow" />
-
-              <div className="absolute top-1/2 right-1/4 h-16 w-16 bg-yellow-500/30 dark:bg-yellow-500/20 rounded-full blur-xl" />
-              <div className="absolute top-1/2 right-[27%] h-6 w-6 bg-yellow-500 rounded-full border-2 border-white dark:border-slate-800 shadow" />
-
-              <div className="absolute bottom-1/3 left-1/4 h-16 w-16 bg-emerald-500/30 dark:bg-emerald-500/20 rounded-full blur-xl" />
-              <div className="absolute bottom-1/3 left-[28%] h-6 w-6 bg-emerald-500 rounded-full border-2 border-white dark:border-slate-800 shadow" />
-
-              <div className="absolute bottom-4 left-4 bg-white/95 dark:bg-slate-900/95 px-3 py-1.5 rounded-lg border border-gray-100 dark:border-slate-800 text-[10px] font-bold flex items-center gap-4 shadow-md z-10">
-                <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-red-600 inline-block" /> High</span>
-                <span className="flex items-center gap-1"><span className="h-2.5 w-2.5 rounded-full bg-emerald-500 inline-block" /> Low</span>
+            {/* Visual Real-time Heatmap Leaflet Map */}
+            <div className="h-64 rounded-2xl border border-gray-150 dark:border-slate-800/80 overflow-hidden relative shadow-inner">
+              <MapContainer 
+                center={mapCenter} 
+                zoom={12} 
+                key={`${mapCenter[0]}-${mapCenter[1]}`}
+                className="h-full w-full"
+                scrollWheelZoom={false}
+              >
+                <TileLayer
+                  attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
+                  url={darkMode 
+                    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+                    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                  }
+                />
+                {charts.heatmapData?.map((item, idx) => (
+                  <CircleMarker
+                    key={idx}
+                    center={[item.latitude, item.longitude]}
+                    radius={item.priority === 'Critical' ? 14 : item.priority === 'High' ? 10 : 7}
+                    fillColor={item.priority === 'Critical' ? '#ef4444' : item.priority === 'High' ? '#f59e0b' : '#10b981'}
+                    color={item.priority === 'Critical' ? '#ef4444' : item.priority === 'High' ? '#f59e0b' : '#10b981'}
+                    weight={1.5}
+                    fillOpacity={0.4}
+                  />
+                ))}
+              </MapContainer>
+              <div className="absolute bottom-3 left-3 bg-white/95 dark:bg-slate-900/95 px-2.5 py-1 rounded-lg border border-gray-100 dark:border-slate-800 text-[9px] font-bold flex items-center gap-3 shadow-md z-[1000] pointer-events-none">
+                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-red-500 inline-block" /> Critical</span>
+                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-amber-500 inline-block" /> High</span>
+                <span className="flex items-center gap-1"><span className="h-2 w-2 rounded-full bg-emerald-500 inline-block" /> Active</span>
               </div>
             </div>
           </div>

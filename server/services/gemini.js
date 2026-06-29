@@ -172,71 +172,127 @@ export const detectDuplicate = (newLat, newLon, newCategory, existingIssues) => 
 
 // 3. Hotspot Analysis & Predictive Insights
 export const generateAIInsights = (issues) => {
-  const insights = [];
   const areaCounts = {};
   const categoryCounts = {};
+  const activeIssues = issues.filter(i => i.status !== 'Resolved');
 
-  issues.forEach(issue => {
-    const area = issue.location?.address || 'Unknown Area';
-    const sector = area.split(',')[0].trim(); // Extract Sector or Ward
-    const cat = issue.category;
+  activeIssues.forEach(issue => {
+    // Extract a clean ward or sector name from the address
+    const address = issue.location?.address || '';
+    let sector = 'Unknown Area';
+    
+    // Parse common patterns like "Sector 15", "Ward 4", "New Delhi"
+    const match = address.match(/(Sector\s+\d+|Ward\s+\d+|Phase\s+\d+|Pocket\s+\d+|Block\s+[A-Z\d]+)/i);
+    if (match) {
+      sector = match[1];
+    } else if (address) {
+      const parts = address.split(',');
+      sector = parts[0].trim() || 'Local Area';
+    }
 
     areaCounts[sector] = (areaCounts[sector] || 0) + 1;
-    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+    categoryCounts[issue.category] = (categoryCounts[issue.category] || 0) + 1;
   });
 
-  // Identify hotspots (sectors with more than 3 active issues)
+  // Identify hotspots dynamically (any area with active issues)
   const hotspots = Object.entries(areaCounts)
-    .filter(([_, count]) => count >= 3)
-    .map(([sector, count]) => ({
-      sector,
-      count,
-      message: `Sector ${sector} shows a 35% increase in ${Object.keys(categoryCounts)[0] || 'infrastructure'} complaints.`
-    }));
+    .sort((a, b) => b[1] - a[1]) // highest count first
+    .map(([sector, count]) => {
+      // Find the primary category in this sector
+      const sectorIssues = activeIssues.filter(i => {
+        const addr = i.location?.address || '';
+        return addr.includes(sector);
+      });
+      const primaryCat = sectorIssues[0]?.category || 'infrastructure';
+      
+      return {
+        sector,
+        count,
+        message: `${sector} requires inspection due to a cluster of ${count} active ${primaryCat} complaint(s).`
+      };
+    });
 
-  // Construct Alerts
+  // Construct Alerts dynamically based on actual categories
   const predictiveAlerts = [];
-  if (categoryCounts['Pothole'] > 2) {
+  
+  if (categoryCounts['Pothole'] > 0) {
+    const sectors = activeIssues.filter(i => i.category === 'Pothole').map(i => {
+      const addr = i.location?.address || '';
+      const match = addr.match(/(Sector\s+\d+|Ward\s+\d+)/i);
+      return match ? match[1] : 'local roads';
+    });
+    const uniqueSectors = [...new Set(sectors)].join(', ');
     predictiveAlerts.push({
-      title: 'Pothole Surge Warning',
-      message: 'Pothole reports are rising; likely to experience increased complaints during upcoming monsoon showers.'
-    });
-  }
-  if (categoryCounts['Water Leakage'] > 2) {
-    predictiveAlerts.push({
-      title: 'Water Infrastructure Warning',
-      message: 'Water leakage reports rising by 20% this week. Ward 4 and Sector 12 require pipe inspections.'
-    });
-  }
-
-  // Fallback default insights if no data exists
-  if (hotspots.length === 0) {
-    hotspots.push({
-      sector: 'Sector 15',
-      count: 12,
-      message: 'Sector 15 shows 35% more pothole reports than last month.'
-    });
-    hotspots.push({
-      sector: 'Ward 7',
-      count: 8,
-      message: 'Ward 7 has the highest water leakage frequency.'
+      title: 'Pothole Degradation Warning',
+      message: `Pothole complaints in ${uniqueSectors} are vulnerable to water pooling and expanding. Immediate sealing is advised.`
     });
   }
 
-  if (predictiveAlerts.length === 0) {
+  if (categoryCounts['Water Leakage'] > 0) {
+    const sectors = activeIssues.filter(i => i.category === 'Water Leakage').map(i => {
+      const addr = i.location?.address || '';
+      const match = addr.match(/(Sector\s+\d+|Ward\s+\d+)/i);
+      return match ? match[1] : 'water lines';
+    });
+    const uniqueSectors = [...new Set(sectors)].join(', ');
     predictiveAlerts.push({
-      title: 'Monsoon Alert',
-      message: 'Sector 15 is likely to experience increased pothole complaints during monsoon.'
+      title: 'Pressure Loss Risk',
+      message: `Water leakage reported in ${uniqueSectors} suggests pipe joints may be deteriorating. Monitor pressure drops.`
+    });
+  }
+
+  if (categoryCounts['Garbage'] > 0) {
+    const sectors = activeIssues.filter(i => i.category === 'Garbage').map(i => {
+      const addr = i.location?.address || '';
+      const match = addr.match(/(Sector\s+\d+|Ward\s+\d+)/i);
+      return match ? match[1] : 'public spaces';
+    });
+    const uniqueSectors = [...new Set(sectors)].join(', ');
+    predictiveAlerts.push({
+      title: 'Sanitation Overflow Risk',
+      message: `Accumulating refuse in ${uniqueSectors} is causing aesthetic degradation and vector risks. Clear waste soon.`
+    });
+  }
+
+  if (categoryCounts['Streetlight'] > 0) {
+    const sectors = activeIssues.filter(i => i.category === 'Streetlight').map(i => {
+      const addr = i.location?.address || '';
+      const match = addr.match(/(Sector\s+\d+|Ward\s+\d+)/i);
+      return match ? match[1] : 'streets';
+    });
+    const uniqueSectors = [...new Set(sectors)].join(', ');
+    predictiveAlerts.push({
+      title: 'Public Safety Surge',
+      message: `Broken streetlights in ${uniqueSectors} create blind spots in security. Schedule bulb replacement.`
+    });
+  }
+
+  // Fallback dynamic defaults if database is clean
+  if (issues.length === 0) {
+    hotspots.push({
+      sector: 'All Sectors Clean',
+      count: 0,
+      message: 'No active safety or maintenance issues reported. Community infrastructure is stable.'
     });
     predictiveAlerts.push({
-      title: 'Pipe Leakage Alert',
-      message: 'Water leakage incidents rising in Ward 4.'
+      title: 'Optimal Status',
+      message: 'Predictive models show no upcoming hotspots or surge risks in any neighborhood.'
+    });
+  } else if (hotspots.length === 0) {
+    hotspots.push({
+      sector: 'All Resolved',
+      count: 0,
+      message: 'All reported issues have been successfully resolved by the municipal teams.'
+    });
+    predictiveAlerts.push({
+      title: 'Infrastructure Cleared',
+      message: 'No pending complaints. Standard monitoring schedule is active.'
     });
   }
 
   return {
-    hotspots,
-    predictiveAlerts,
+    hotspots: hotspots.slice(0, 3), // limit to top 3 hotspots
+    predictiveAlerts: predictiveAlerts.slice(0, 2),
     risingCategories: Object.entries(categoryCounts)
       .map(([category, count]) => ({ category, count }))
       .sort((a, b) => b.count - a.count)

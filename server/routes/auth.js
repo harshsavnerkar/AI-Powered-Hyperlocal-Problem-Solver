@@ -2,6 +2,8 @@ import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import Issue from '../models/Issue.js';
+import Verification from '../models/Verification.js';
 import { getStore, saveStore } from '../config/db.js';
 import { protect } from '../middleware/auth.js';
 import { sendOTPEmail } from '../services/email.js';
@@ -275,12 +277,51 @@ router.post('/verify-login-otp', async (req, res) => {
   }
 });
 
-// @desc    Get user profile
+// @desc    Get user profile (Includes dynamic stats based on role)
 // @route   GET /api/auth/profile
 // @access  Private
 router.get('/profile', protect, async (req, res) => {
-  // req.user is already loaded by 'protect' middleware
-  res.json(req.user);
+  const userId = req.user._id;
+  const userRole = req.user.role;
+
+  let reportsCount = 0;
+  let resolvedCount = 0;
+  let validationsCount = 0;
+
+  if (global.dbFallback) {
+    const store = getStore();
+    if (userRole === 'citizen') {
+      reportsCount = store.issues.filter(i => i.reportedBy === userId).length;
+      resolvedCount = store.issues.filter(i => i.reportedBy === userId && i.status === 'Resolved').length;
+    } else if (userRole === 'volunteer') {
+      validationsCount = store.verifications.filter(v => v.userId === userId && v.status === 'Verify').length;
+    } else if (userRole === 'admin') {
+      resolvedCount = store.issues.filter(i => i.status === 'Resolved').length;
+    }
+  } else {
+    try {
+      if (userRole === 'citizen') {
+        reportsCount = await Issue.countDocuments({ reportedBy: userId });
+        resolvedCount = await Issue.countDocuments({ reportedBy: userId, status: 'Resolved' });
+      } else if (userRole === 'volunteer') {
+        validationsCount = await Verification.countDocuments({ userId: userId, status: 'Verify' });
+      } else if (userRole === 'admin') {
+        resolvedCount = await Issue.countDocuments({ status: 'Resolved' });
+      }
+    } catch (err) {
+      console.error('Failed to calculate profile stats:', err);
+    }
+  }
+
+  // Convert Mongoose document to object to add dynamic properties safely
+  const userObj = typeof req.user.toObject === 'function' ? req.user.toObject() : { ...req.user };
+
+  res.json({
+    ...userObj,
+    reportsCount,
+    resolvedCount,
+    validationsCount
+  });
 });
 
 // @desc    Get leaderboard

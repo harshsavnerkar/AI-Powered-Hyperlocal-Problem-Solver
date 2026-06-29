@@ -247,9 +247,12 @@ const MapView = () => {
                   {issue.media?.imageUrl && (
                     <div className="h-20 w-full rounded-lg bg-gray-50 overflow-hidden mb-1 border border-gray-100">
                       <img 
-                        src={`${API_BASE_URL.replace('/api', '')}${issue.media.imageUrl}`} 
+                        src={issue.media.imageUrl.startsWith('http') ? issue.media.imageUrl : `${API_BASE_URL.replace('/api', '')}${issue.media.imageUrl}`} 
                         alt={issue.title} 
                         className="h-full w-full object-cover" 
+                        onError={(e) => {
+                          e.target.parentNode.style.display = 'none';
+                        }}
                       />
                     </div>
                   )}

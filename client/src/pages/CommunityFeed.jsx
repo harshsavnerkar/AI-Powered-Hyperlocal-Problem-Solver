@@ -188,9 +188,12 @@ const CommunityFeed = () => {
                   {issue.media?.imageUrl && (
                     <div className="mt-3 rounded-2xl border border-gray-100 dark:border-slate-800/80 max-h-72 overflow-hidden bg-gray-50 dark:bg-slate-900 shadow-inner flex items-center justify-center">
                       <img 
-                        src={`${API_BASE_URL.replace('/api', '')}${issue.media.imageUrl}`} 
+                        src={issue.media.imageUrl.startsWith('http') ? issue.media.imageUrl : `${API_BASE_URL.replace('/api', '')}${issue.media.imageUrl}`} 
                         alt="Issue reported" 
                         className="w-full h-full object-cover" 
+                        onError={(e) => {
+                          e.target.parentNode.style.display = 'none';
+                        }}
                       />
                     </div>
                   )}
