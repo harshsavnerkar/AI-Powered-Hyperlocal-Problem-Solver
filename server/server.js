@@ -52,7 +52,10 @@ app.use('/api/notifications', notificationRoutes);
 
 // Root route
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to the Community Hero API' });
+  res.json({ 
+    message: 'Welcome to the Community Hero API',
+    databaseMode: global.dbFallback ? 'Local JSON Fallback (Ephemeral)' : 'MongoDB Atlas (Persistent)'
+  });
 });
 
 // Port settings
