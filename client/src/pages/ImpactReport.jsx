@@ -129,8 +129,8 @@ const ImpactReport = () => {
             </div>
             <div>
               <h3 className="text-lg font-black tracking-tight leading-none text-white">{user?.name}</h3>
-              <p className="text-[9px] font-bold text-gray-400 dark:text-slate-500 uppercase tracking-widest mt-1.5 flex items-center justify-center gap-1">
-                <MapPin size={9} /> India Wards
+              <p className="text-[9px] font-bold text-emerald-400 dark:text-emerald-450 uppercase tracking-widest mt-1.5 flex items-center justify-center gap-1">
+                <MapPin size={9} /> {user?.role === 'citizen' ? 'Citizen Contributor' : user?.role === 'volunteer' ? 'Community Volunteer' : 'System Administrator'}
               </p>
             </div>
           </div>
