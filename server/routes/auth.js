@@ -400,4 +400,117 @@ router.post('/google-login', async (req, res) => {
   }
 });
 
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+router.put('/profile', protect, async (req, res) => {
+  const { name, phone } = req.body;
+
+  if (!name || !phone) {
+    return res.status(400).json({ message: 'Please provide name and phone number' });
+  }
+
+  if (global.dbFallback) {
+    const store = getStore();
+    const userIndex = store.users.findIndex(u => u._id === req.user._id);
+
+    if (userIndex === -1) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    store.users[userIndex].name = name;
+    store.users[userIndex].phone = phone;
+    saveStore(store);
+
+    const updatedUser = store.users[userIndex];
+    res.json({
+      _id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      phone: updatedUser.phone,
+      role: updatedUser.role,
+      points: updatedUser.points,
+      badges: updatedUser.badges
+    });
+  } else {
+    try {
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      user.name = name;
+      user.phone = phone;
+      await user.save();
+
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        points: user.points,
+        badges: user.badges
+      });
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  }
+});
+
+// @desc    Update user password
+// @route   PUT /api/auth/password
+// @access  Private
+router.put('/password', protect, async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  if (!oldPassword || !newPassword) {
+    return res.status(400).json({ message: 'Please provide old and new passwords' });
+  }
+
+  if (global.dbFallback) {
+    const store = getStore();
+    const userIndex = store.users.findIndex(u => u._id === req.user._id);
+
+    if (userIndex === -1) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = store.users[userIndex];
+    if (user.password !== '' && !(await bcrypt.compare(oldPassword, user.password))) {
+      return res.status(400).json({ message: 'Incorrect old password' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    store.users[userIndex].password = hashedPassword;
+    saveStore(store);
+
+    res.json({ message: 'Password updated successfully' });
+  } else {
+    try {
+      const user = await User.findById(req.user._id);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      if (user.password !== '' && !(await bcrypt.compare(oldPassword, user.password))) {
+        return res.status(400).json({ message: 'Incorrect old password' });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      user.password = hashedPassword;
+      await user.save();
+
+      res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+      res.status(550).json({ message: error.message });
+    }
+  }
+});
+
 export default router;
+

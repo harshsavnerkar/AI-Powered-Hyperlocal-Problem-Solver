@@ -16,14 +16,17 @@ export const protect = async (req, res, next) => {
         if (!user) {
           return res.status(401).json({ message: 'Not authorized, user not found in local store' });
         }
-        // Exclude password
+        // Exclude password but mark if they have one
         const { password, ...userWithoutPassword } = user;
-        req.user = userWithoutPassword;
+        req.user = { ...userWithoutPassword, hasPassword: password !== '' && password !== undefined && password !== null };
       } else {
-        req.user = await User.findById(decoded.id).select('-password');
-        if (!req.user) {
+        const user = await User.findById(decoded.id);
+        if (!user) {
           return res.status(401).json({ message: 'Not authorized, user not found' });
         }
+        const userObj = user.toObject();
+        const { password, ...userWithoutPassword } = userObj;
+        req.user = { ...userWithoutPassword, hasPassword: !!password };
       }
       next();
     } catch (error) {

@@ -188,8 +188,12 @@ export const AuthProvider = ({ children }) => {
     setUser(prev => prev ? { ...prev, points, badges } : null);
   };
 
+  const updateUser = (userData) => {
+    setUser(prev => prev ? { ...prev, ...userData } : null);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, error, login, signup, logout, updateUserPoints, googleLogin, googleData, clearGoogleData, verifyLoginOtp }}>
+    <AuthContext.Provider value={{ user, token, loading, error, login, signup, logout, updateUser, updateUserPoints, googleLogin, googleData, clearGoogleData, verifyLoginOtp }}>
       {children}
     </AuthContext.Provider>
   );
