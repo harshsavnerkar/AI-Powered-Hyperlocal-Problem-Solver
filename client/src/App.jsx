@@ -19,6 +19,7 @@ import MapView from './pages/MapView.jsx';
 import Analytics from './pages/Analytics.jsx';
 import Profile from './pages/Profile.jsx';
 import Settings from './pages/Settings.jsx';
+import ImpactReport from './pages/ImpactReport.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import appLogo from './assets/logo.jpg';
 
@@ -140,6 +141,7 @@ function AppContent() {
               <Route path="/analytics" element={<Analytics />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/impact" element={<ImpactReport />} />
             </Route>
 
             {/* Catch-all redirector */}

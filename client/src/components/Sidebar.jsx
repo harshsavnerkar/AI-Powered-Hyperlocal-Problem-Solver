@@ -17,7 +17,8 @@ import {
   TrendingUp,
   Map,
   ShieldCheck,
-  CheckSquare
+  CheckSquare,
+  Sparkles
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -65,6 +66,7 @@ const Sidebar = () => {
           { name: 'Community Feed', path: '/feed', icon: Rss },
           { name: 'Leaderboard', path: '/leaderboard', icon: Trophy },
           { name: 'Rewards', path: '/rewards', icon: Gift },
+          { name: 'My Impact', path: '/impact', icon: Sparkles },
           { name: 'Profile', path: '/profile', icon: User },
           { name: 'Settings', path: '/settings', icon: Settings },
         ];
@@ -75,6 +77,7 @@ const Sidebar = () => {
           { name: 'Verify Issues', path: '/verify-issues', icon: ShieldCheck },
           { name: 'Community Feed', path: '/feed', icon: Rss },
           { name: 'Leaderboard', path: '/leaderboard', icon: Trophy },
+          { name: 'My Impact', path: '/impact', icon: Sparkles },
           { name: 'Profile', path: '/profile', icon: User },
           { name: 'Settings', path: '/settings', icon: Settings },
         ];
@@ -85,6 +88,7 @@ const Sidebar = () => {
           { name: 'Issue Management', path: '/issue-management', icon: ListTodo },
           { name: 'Map View', path: '/map-view', icon: Map },
           { name: 'Analytics', path: '/analytics', icon: TrendingUp },
+          { name: 'My Impact', path: '/impact', icon: Sparkles },
           { name: 'Profile', path: '/profile', icon: User },
           { name: 'Settings', path: '/settings', icon: Settings },
         ];

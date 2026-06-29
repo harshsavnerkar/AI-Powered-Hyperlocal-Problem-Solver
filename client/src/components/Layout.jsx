@@ -66,6 +66,7 @@ const Layout = () => {
     if (path === '/analytics') return 'Civic Analytics';
     if (path === '/profile') return 'Citizen Profile';
     if (path === '/settings') return 'Account Settings';
+    if (path === '/impact') return 'My Civic Impact';
     return 'CommunityHero';
   };
 

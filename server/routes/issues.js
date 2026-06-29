@@ -10,6 +10,7 @@ import { getStore, saveStore } from '../config/db.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { analyzeIssue, detectDuplicate, getDistanceInMeters } from '../services/gemini.js';
 import { dispatchIssueToMunicipality } from '../services/dispatch.js';
+import { broadcastCriticalSmsAlert } from '../services/sms.js';
 
 const router = express.Router();
 
@@ -298,6 +299,9 @@ router.post('/report', protect, authorize('citizen'), async (req, res) => {
             store
           );
         });
+      
+      // Broadcast SMS alert to nearby volunteers
+      broadcastCriticalSmsAlert(newIssue, store.users).catch(err => console.error('SMS broadcast failed:', err));
     }
 
     saveStore(store);
@@ -363,6 +367,11 @@ router.post('/report', protect, authorize('citizen'), async (req, res) => {
             false
           );
         }
+        
+        // Broadcast SMS alert to nearby volunteers
+        User.find({}).then(allUsers => {
+          broadcastCriticalSmsAlert(issue, allUsers);
+        }).catch(err => console.error('SMS broadcast failed:', err));
       }
 
       res.status(201).json({
