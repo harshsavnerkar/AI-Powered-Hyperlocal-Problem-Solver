@@ -151,7 +151,7 @@ router.post('/signup', async (req, res) => {
   }
 });
 
-// @desc    Authenticate user & send login OTP
+// @desc    Authenticate user & return JWT token
 // @route   POST /api/auth/login
 // @access  Public
 router.post('/login', async (req, res) => {
@@ -168,19 +168,16 @@ router.post('/login', async (req, res) => {
     const user = store.users.find(u => u.email === normalizedEmail);
 
     if (user && (user.password === '' || await bcrypt.compare(password, user.password))) {
-      // Generate OTP for login
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
-      otpStore.set(normalizedEmail, {
-        otp,
-        expires: Date.now() + 5 * 60 * 1000,
-        credentialsVerified: true,
-        userId: user._id
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        points: user.points,
+        badges: user.badges,
+        token: generateToken(user._id)
       });
-
-      // Send real email OTP
-      await sendOTPEmail(normalizedEmail, otp, 'Login');
-
-      res.json({ otpRequired: true, email: normalizedEmail });
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
     }
@@ -189,19 +186,16 @@ router.post('/login', async (req, res) => {
       const user = await User.findOne({ email: normalizedEmail });
 
       if (user && (user.password === '' || await bcrypt.compare(password, user.password))) {
-        // Generate OTP for login
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
-        otpStore.set(normalizedEmail, {
-          otp,
-          expires: Date.now() + 5 * 60 * 1000,
-          credentialsVerified: true,
-          userId: user._id
+        res.json({
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone,
+          role: user.role,
+          points: user.points,
+          badges: user.badges,
+          token: generateToken(user._id)
         });
-
-        // Send real email OTP
-        await sendOTPEmail(normalizedEmail, otp, 'Login');
-
-        res.json({ otpRequired: true, email: normalizedEmail });
       } else {
         res.status(401).json({ message: 'Invalid email or password' });
       }
