@@ -9,6 +9,7 @@ import Notification from '../models/Notification.js';
 import { getStore, saveStore } from '../config/db.js';
 import { protect, authorize } from '../middleware/auth.js';
 import { analyzeIssue, detectDuplicate, getDistanceInMeters } from '../services/gemini.js';
+import { dispatchIssueToMunicipality } from '../services/dispatch.js';
 
 const router = express.Router();
 
@@ -420,6 +421,8 @@ router.post('/:id/verify', protect, authorize('volunteer', 'citizen'), async (re
     const volunteerVotes = verificationsForIssue.filter(v => v.status === 'Verify' && v.role === 'volunteer').length;
     if (issue.status === 'Reported' && (volunteerVotes >= 1 || verifyVotes >= 3)) {
       issue.status = 'Verified';
+      // Trigger municipal dispatch asynchronously
+      dispatchIssueToMunicipality(issue, true, store).catch(err => console.error('Dispatch failed:', err));
     }
 
     // Award Points
@@ -478,6 +481,8 @@ router.post('/:id/verify', protect, authorize('volunteer', 'citizen'), async (re
       const volunteerVotes = verifications.filter(v => v.status === 'Verify' && v.role === 'volunteer').length;
       if (issue.status === 'Reported' && (volunteerVotes >= 1 || verifyVotes >= 3)) {
         issue.status = 'Verified';
+        // Trigger municipal dispatch asynchronously
+        dispatchIssueToMunicipality(issue, false).catch(err => console.error('Dispatch failed:', err));
       }
 
       await issue.save();
