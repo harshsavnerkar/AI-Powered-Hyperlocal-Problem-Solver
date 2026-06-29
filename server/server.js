@@ -60,18 +60,6 @@ const PORT = process.env.PORT || 5000;
 
 // Connect to Database first, then spin up server
 connectDB().then(async () => {
-  if (!global.dbFallback) {
-    try {
-      console.log('🧹 Clearing MongoDB collections for fresh test...');
-      await User.deleteMany({});
-      await Issue.deleteMany({});
-      await Verification.deleteMany({});
-      await Notification.deleteMany({});
-      console.log('✅ MongoDB collections cleared.');
-    } catch (err) {
-      console.error('Failed to clear MongoDB collections:', err);
-    }
-  }
   // await seedDatabase();
   app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT} in ${global.dbFallback ? 'Local JSON Fallback' : 'MongoDB'} mode`);
