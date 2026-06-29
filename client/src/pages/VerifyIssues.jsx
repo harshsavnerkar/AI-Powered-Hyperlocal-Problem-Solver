@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth, API_BASE_URL } from '../context/AuthContext.jsx';
 import { useNotifications } from '../context/NotificationContext.jsx';
 import { ShieldCheck, Check, X, MapPin, Calendar } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 const VerifyIssues = () => {
   const { token, user, updateUserPoints } = useAuth();
@@ -53,6 +54,14 @@ const VerifyIssues = () => {
       if (response.ok) {
         alert(`Successfully ${status.toLowerCase()}ed! You earned +5 points.`);
         updateUserPoints(user.points + 5, user.badges);
+        
+        // Trigger verification confetti
+        confetti({
+          particleCount: 80,
+          spread: 60,
+          origin: { y: 0.8 }
+        });
+
         setIssues(prev => prev.filter(i => i._id !== issueId));
         refreshNotifications();
         fetchVerifyIssues();

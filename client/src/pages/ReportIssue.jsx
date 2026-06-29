@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, API_BASE_URL } from '../context/AuthContext.jsx';
+import confetti from 'canvas-confetti';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { useNotifications } from '../context/NotificationContext.jsx';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
@@ -176,6 +177,13 @@ const ReportIssue = () => {
         
         // Award points in Auth state
         updateUserPoints(user.points + 10, user.badges);
+        
+        // Trigger confetti burst
+        confetti({
+          particleCount: 100,
+          spread: 75,
+          origin: { y: 0.65 }
+        });
         
         setTimeout(() => {
           setSubmitting(false);

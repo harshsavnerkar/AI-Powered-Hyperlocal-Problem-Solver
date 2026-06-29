@@ -1,14 +1,53 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useLocation, Navigate } from 'react-router-dom';
 import Sidebar from './Sidebar.jsx';
 import Header from './Header.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import appLogo from '../assets/logo.jpg';
+import confetti from 'canvas-confetti';
+import { Award, X, Sparkles } from 'lucide-react';
 
 const Layout = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
+
+  const [newBadge, setNewBadge] = useState(null);
+  const prevBadgesCountRef = useRef(user?.badges?.length || 0);
+
+  // Trigger celebration confetti
+  const triggerConfetti = () => {
+    const duration = 3 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+    const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+    const interval = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+
+      if (timeLeft <= 0) {
+        return clearInterval(interval);
+      }
+
+      const particleCount = 50 * (timeLeft / duration);
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+      confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+    }, 250);
+  };
+
+  // Listen for badge unlock milestones
+  useEffect(() => {
+    if (user && user.badges) {
+      const prevCount = prevBadgesCountRef.current;
+      if (user.badges.length > prevCount) {
+        const unlocked = user.badges[user.badges.length - 1];
+        setNewBadge(unlocked);
+        triggerConfetti();
+      }
+      prevBadgesCountRef.current = user.badges.length;
+    }
+  }, [user?.badges]);
 
   // Determine Title based on URL path
   const getPageTitle = () => {
@@ -145,6 +184,68 @@ const Layout = () => {
           </div>
         </motion.div>
       )}
+
+      {/* Badge Achievement Modal */}
+      <AnimatePresence>
+        {newBadge && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.85, y: 30, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.85, y: -30, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+              className="relative w-full max-w-sm bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 border border-emerald-500/30 rounded-3xl shadow-2xl p-6 text-center space-y-6 overflow-hidden"
+            >
+              {/* Outer glow aura */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-emerald-500/10 blur-[60px] pointer-events-none rounded-full" />
+
+              {/* Close Button */}
+              <button
+                onClick={() => setNewBadge(null)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+
+              {/* Icon Container */}
+              <div className="mx-auto h-20 w-20 rounded-full bg-gradient-to-tr from-amber-400 via-yellow-300 to-orange-500 p-0.5 shadow-xl relative animate-pulse">
+                <div className="h-full w-full rounded-full bg-slate-950 flex items-center justify-center text-amber-400">
+                  <Award size={40} />
+                </div>
+                <div className="absolute -top-1 -right-1 text-yellow-300 animate-spin-slow">
+                  <Sparkles size={16} />
+                </div>
+              </div>
+
+              {/* Texts */}
+              <div className="space-y-2">
+                <span className="inline-block px-3 py-1 bg-emerald-950/60 border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-widest rounded-full">
+                  Achievement Unlocked!
+                </span>
+                <h3 className="text-lg font-black text-white font-sans tracking-tight">
+                  {newBadge}
+                </h3>
+                <p className="text-[10px] text-slate-450 px-4 leading-relaxed">
+                  Congratulations! Your civic action and community service unlocked this official badge rank.
+                </p>
+              </div>
+
+              {/* Button */}
+              <button
+                onClick={() => setNewBadge(null)}
+                className="w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold rounded-xl text-xs cursor-pointer shadow-lg transition-all"
+              >
+                Awesome, thanks!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </AnimatePresence>
   );
 };
