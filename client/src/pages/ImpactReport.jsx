@@ -52,7 +52,12 @@ const ImpactReport = () => {
     if (!cardRef.current) return;
     setDownloading(true);
     try {
-      const canvas = await html2canvas(cardRef.current, {
+      const html2canvasFn = html2canvas.default || html2canvas;
+      if (typeof html2canvasFn !== 'function') {
+        throw new Error('html2canvas is not a function. Check library loading.');
+      }
+      
+      const canvas = await html2canvasFn(cardRef.current, {
         useCORS: true,
         scale: 2, // higher resolution
         backgroundColor: '#0b1317' // Slate 950 dark background
@@ -63,7 +68,7 @@ const ImpactReport = () => {
       link.click();
     } catch (err) {
       console.error('Failed to generate card image:', err);
-      alert('Failed to download card. Please try again.');
+      alert(`Failed to download card: ${err.message || 'Unknown error'}`);
     } finally {
       setDownloading(false);
     }
