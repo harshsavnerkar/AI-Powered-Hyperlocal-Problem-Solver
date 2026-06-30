@@ -51,25 +51,25 @@ const Header = ({ title, toggleSidebar }) => {
       </div>
 
       {/* Control Actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-1.5 md:gap-4">
         {/* Theme Toggle */}
         <button
           onClick={toggleTheme}
-          className="p-2.5 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800/80 transition-all duration-200"
+          className="p-2 md:p-2.5 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800/80 transition-all duration-200"
           title="Toggle Dark/Light Mode"
         >
-          {darkMode ? <Sun size={20} className="text-amber-400 animate-spin-slow" /> : <Moon size={20} />}
+          {darkMode ? <Sun size={18} className="text-amber-400 animate-spin-slow" /> : <Moon size={18} />}
         </button>
 
         {/* Notifications */}
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="p-2.5 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800/80 transition-all duration-200 relative"
+            className="p-2 md:p-2.5 rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800/80 transition-all duration-200 relative"
           >
-            <Bell size={20} />
+            <Bell size={18} />
             {unreadCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 h-4 w-4 bg-red-500 text-white rounded-full text-[9px] flex items-center justify-center font-bold font-sans">
+              <span className="absolute top-1.5 right-1.5 h-3.5 w-3.5 bg-red-500 text-white rounded-full text-[8px] flex items-center justify-center font-bold font-sans">
                 {unreadCount}
               </span>
             )}
@@ -122,12 +122,12 @@ const Header = ({ title, toggleSidebar }) => {
         </div>
 
         {/* User profile dropdown */}
-        <div className="relative flex items-center gap-3 border-l border-gray-200 dark:border-slate-800 pl-4" ref={profileRef}>
+        <div className="relative flex items-center gap-1.5 md:gap-3 border-l border-gray-200 dark:border-slate-800 pl-2.5 md:pl-4" ref={profileRef}>
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-3 text-left focus:outline-none"
+            className="flex items-center gap-1.5 md:gap-3 text-left focus:outline-none"
           >
-            <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-emerald-400 to-teal-600 flex items-center justify-center text-white font-bold text-sm shadow-md border-2 border-white dark:border-slate-800">
+            <div className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-gradient-to-tr from-emerald-400 to-teal-600 flex items-center justify-center text-white font-bold text-xs md:text-sm shadow-md border-2 border-white dark:border-slate-800">
               {user.name?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'CH'}
             </div>
             <div className="hidden md:block">

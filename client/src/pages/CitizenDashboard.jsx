@@ -189,12 +189,12 @@ const CitizenDashboard = () => {
             {darkMode ? 'Together we can build a better and smarter community.' : "Let's make our community a better place today."}
           </p>
         </div>
-        <div className="flex gap-3 z-10 shrink-0">
-          <Link to="/report" className="flex items-center gap-1.5 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-600/20 transition-all hover:scale-102 active:scale-98 cursor-pointer">
+        <div className="flex flex-col sm:flex-row gap-3 z-10 shrink-0 w-full sm:w-auto mt-4 sm:mt-0">
+          <Link to="/report" className="flex items-center justify-center gap-1.5 px-5 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-600/20 transition-all hover:scale-102 active:scale-98 cursor-pointer w-full sm:w-auto">
             <Plus size={16} />
             Report New Issue
           </Link>
-          <Link to="/nearby-issues" className="flex items-center gap-1.5 px-5 py-3 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 border border-gray-250/60 dark:border-slate-800 font-extrabold text-xs rounded-2xl shadow-sm transition-all hover:scale-102 active:scale-98 cursor-pointer">
+          <Link to="/nearby-issues" className="flex items-center justify-center gap-1.5 px-5 py-3.5 bg-white dark:bg-slate-900 text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-800 border border-gray-250/60 dark:border-slate-800 font-extrabold text-xs rounded-2xl shadow-sm transition-all hover:scale-102 active:scale-98 cursor-pointer w-full sm:w-auto">
             <MapPin size={16} className="text-emerald-500" />
             View Nearby Issues
           </Link>
