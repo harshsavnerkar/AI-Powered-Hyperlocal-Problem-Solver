@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth, API_BASE_URL } from '../context/AuthContext.jsx';
 import { 
   Trophy, 
@@ -8,45 +8,40 @@ import {
   Sparkles, 
   Calendar, 
   MapPin, 
-  CheckCircle2, 
   Heart 
 } from 'lucide-react';
 import html2canvas from 'html2canvas-pro';
 import { motion } from 'framer-motion';
 
 const ImpactReport = () => {
-  const { token, user } = useAuth();
-  const cardRef = useRef(null);
-  const [reportsCount, setReportsCount] = useState(0);
-  const [resolvedCount, setResolvedCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const { token, user, updateUser } = useAuth();
+  const cardRef = React.useRef(null);
   const [downloading, setDownloading] = useState(false);
 
+  // Sync profile on page load to ensure stats are 100% fresh from DB
   useEffect(() => {
-    const fetchUserStats = async () => {
+    const syncProfile = async () => {
       try {
-        const res = await fetch(`${API_BASE_URL}/issues`, {
+        const res = await fetch(`${API_BASE_URL}/auth/profile`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
-          const data = await res.json();
-          // Filter issues reported by this user
-          const myReports = data.filter(i => {
-            const reportedById = typeof i.reportedBy === 'object' ? i.reportedBy?._id : i.reportedBy;
-            return reportedById === user?._id;
-          });
-          setReportsCount(myReports.length);
-          setResolvedCount(myReports.filter(i => i.status === 'Resolved').length);
+          const profile = await res.json();
+          updateUser(profile);
         }
       } catch (err) {
-        console.error('Failed to calculate impact stats:', err);
-      } finally {
-        setLoading(false);
+        console.error('Failed to sync profile on impact load:', err);
       }
     };
+    if (token) syncProfile();
+  }, [token]);
 
-    if (token && user) fetchUserStats();
-  }, [token, user]);
+  if (!user) return null;
+
+  const role = user.role || 'citizen';
+  const reportsCount = user.reportsCount || 0;
+  const resolvedCount = user.resolvedCount || 0;
+  const validationsCount = user.validationsCount || 0;
 
   const handleDownload = async () => {
     if (!cardRef.current) return;
@@ -75,14 +70,18 @@ const ImpactReport = () => {
   };
 
   const handleShare = () => {
-    const text = `I'm helping improve my neighborhood on CommunityHero! 🦸‍♂️ I've reported ${reportsCount} local issues, resolved ${resolvedCount}, and earned ${user?.points || 0} contribution points. Check out your community impact here! #CommunityHero #CivicImpact`;
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+    let text = '';
+    if (role === 'citizen') {
+      text = `I'm helping improve my neighborhood on CommunityHero! 🦸‍♂️ I've reported ${reportsCount} local issues, resolved ${resolvedCount}, and earned ${user.points} points.`;
+    } else if (role === 'volunteer') {
+      text = `I'm validating neighborhood reports on CommunityHero! 🛠️ I've verified ${validationsCount} local issues and earned ${user.points} points.`;
+    } else {
+      text = `I'm managing civic resolutions on CommunityHero! ⚙️ We've resolved ${resolvedCount} issues across the community.`;
+    }
+    const tweetText = `${text} Check out your impact card here! #CommunityHero #CivicImpact`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
     window.open(url, '_blank');
   };
-
-  if (loading) {
-    return <div className="p-8 text-center text-xs text-gray-400 animate-pulse">Calculating your civic impact...</div>;
-  }
 
   return (
     <div className="max-w-xl mx-auto space-y-8 p-1 sm:p-2">
@@ -116,7 +115,7 @@ const ImpactReport = () => {
               </span>
             </div>
             <span className="px-2.5 py-0.5 border border-emerald-500/35 bg-emerald-950/30 text-emerald-400 text-[8px] font-black uppercase tracking-widest rounded-full flex items-center gap-1">
-              <Sparkles size={8} /> Verified Citizen
+              <Sparkles size={8} /> Certified Helper
             </span>
           </div>
 
@@ -130,36 +129,66 @@ const ImpactReport = () => {
             <div>
               <h3 className="text-lg font-black tracking-tight leading-none text-white">{user?.name}</h3>
               <p className="text-[9px] font-bold text-emerald-400 dark:text-emerald-450 uppercase tracking-widest mt-1.5 flex items-center justify-center gap-1">
-                <MapPin size={9} /> {user?.role === 'citizen' ? 'Citizen Contributor' : user?.role === 'volunteer' ? 'Community Volunteer' : 'System Administrator'}
+                <MapPin size={9} /> {role === 'citizen' ? 'Citizen Contributor' : role === 'volunteer' ? 'Community Volunteer' : 'System Administrator'}
               </p>
             </div>
           </div>
 
-          {/* Core Stats Row */}
-          <div className="grid grid-cols-3 gap-2 bg-slate-950/50 backdrop-blur-sm border border-emerald-500/10 p-3 rounded-2xl z-10">
-            <div className="text-center">
-              <span className="block text-[8px] text-gray-450 uppercase tracking-wider">Reports</span>
-              <span className="block text-sm font-black text-white font-sans mt-0.5">{reportsCount}</span>
-            </div>
-            <div className="text-center border-x border-slate-800">
-              <span className="block text-[8px] text-gray-450 uppercase tracking-wider">Resolved</span>
-              <span className="block text-sm font-black text-emerald-450 font-sans mt-0.5">{resolvedCount}</span>
-            </div>
-            <div className="text-center">
-              <span className="block text-[8px] text-gray-450 uppercase tracking-wider">Points</span>
-              <span className="block text-sm font-black text-amber-450 font-sans mt-0.5">{user?.points || 0}</span>
-            </div>
+          {/* Role-Specific Core Stats Row */}
+          <div className="z-10 bg-slate-950/50 backdrop-blur-sm border border-emerald-500/10 p-3 rounded-2xl">
+            {role === 'citizen' && (
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-center">
+                  <span className="block text-[8px] text-gray-400 uppercase tracking-wider">Reports</span>
+                  <span className="block text-sm font-black text-white font-sans mt-0.5">{reportsCount}</span>
+                </div>
+                <div className="text-center border-x border-slate-800">
+                  <span className="block text-[8px] text-gray-400 uppercase tracking-wider">Resolved</span>
+                  <span className="block text-sm font-black text-emerald-400 font-sans mt-0.5">{resolvedCount}</span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-[8px] text-gray-400 uppercase tracking-wider">Points</span>
+                  <span className="block text-sm font-black text-amber-450 font-sans mt-0.5">{user.points}</span>
+                </div>
+              </div>
+            )}
+
+            {role === 'volunteer' && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="text-center border-r border-slate-800">
+                  <span className="block text-[8px] text-gray-400 uppercase tracking-wider">Validations</span>
+                  <span className="block text-sm font-black text-white font-sans mt-0.5">{validationsCount}</span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-[8px] text-gray-400 uppercase tracking-wider">Contribution Pts</span>
+                  <span className="block text-sm font-black text-amber-450 font-sans mt-0.5">{user.points}</span>
+                </div>
+              </div>
+            )}
+
+            {role === 'admin' && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="text-center border-r border-slate-800">
+                  <span className="block text-[8px] text-gray-400 uppercase tracking-wider">Resolutions Managed</span>
+                  <span className="block text-sm font-black text-white font-sans mt-0.5">{resolvedCount}</span>
+                </div>
+                <div className="text-center">
+                  <span className="block text-[8px] text-gray-400 uppercase tracking-wider">System Points</span>
+                  <span className="block text-sm font-black text-amber-450 font-sans mt-0.5">{user.points}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Badges showcase row */}
           <div className="z-10 mt-4 space-y-1.5">
-            <span className="block text-center text-[7px] text-gray-450 uppercase tracking-widest font-black">Unlocked Badges Showcase</span>
+            <span className="block text-center text-[7px] text-gray-400 uppercase tracking-widest font-black">Unlocked Badges Showcase</span>
             <div className="flex justify-center gap-2 flex-wrap min-h-[22px]">
               {user?.badges?.length > 0 ? (
                 user.badges.map((badge, idx) => (
                   <span 
                     key={idx} 
-                    className="px-2 py-0.5 border border-slate-800 bg-slate-950/60 text-slate-300 text-[7px] font-bold rounded-lg flex items-center gap-0.5 shadow-sm"
+                    className="px-2 py-0.5 border border-slate-800 bg-slate-950/60 text-slate-300 text-[7px] font-bold rounded-lg flex items-center gap-0.5 shadow-sm animate-pulse"
                   >
                     <Award size={8} className="text-amber-400" /> {badge}
                   </span>
@@ -171,7 +200,7 @@ const ImpactReport = () => {
           </div>
 
           {/* Card Bottom stamp */}
-          <div className="flex justify-between items-center text-[7px] text-gray-550 border-t border-slate-800/80 pt-3 mt-4 z-10">
+          <div className="flex justify-between items-center text-[7px] text-gray-400 border-t border-slate-800/80 pt-3 mt-4 z-10">
             <span className="flex items-center gap-1 font-bold">
               <Heart size={8} className="text-red-500 animate-pulse" /> Certified Civic Helper
             </span>
