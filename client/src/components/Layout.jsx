@@ -13,6 +13,7 @@ const Layout = () => {
   const location = useLocation();
 
   const [newBadge, setNewBadge] = useState(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const prevBadgesCountRef = useRef(user?.badges?.length || 0);
 
   // Trigger celebration confetti
@@ -48,6 +49,11 @@ const Layout = () => {
       prevBadgesCountRef.current = user.badges.length;
     }
   }, [user?.badges]);
+
+  // Close responsive sidebar drawer when navigation route changes
+  useEffect(() => {
+    setIsSidebarOpen(false);
+  }, [location.pathname]);
 
   // Determine Title based on URL path
   const getPageTitle = () => {
@@ -155,8 +161,16 @@ const Layout = () => {
           transition={{ duration: 0.4 }}
           className="flex h-screen overflow-hidden bg-gradient-to-tr from-slate-50 via-[#f0faf5] to-[#f5f9fc] dark:from-[#0b1317] dark:via-[#071610] dark:to-[#0b1216] text-gray-900 dark:text-slate-100 transition-colors duration-200 w-full"
         >
+          {/* Mobile sidebar overlay backdrop */}
+          {isSidebarOpen && (
+            <div 
+              onClick={() => setIsSidebarOpen(false)} 
+              className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs z-40 block md:hidden" 
+            />
+          )}
+
           {/* Sidebar navigation */}
-          <Sidebar />
+          <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
           {/* Main panel */}
           <div className="flex-1 flex flex-col overflow-hidden relative">
@@ -165,7 +179,7 @@ const Layout = () => {
             <div className="absolute top-[-10%] right-[-10%] w-[55%] h-[55%] rounded-full bg-emerald-400/12 dark:bg-emerald-500/5 blur-[120px] pointer-events-none z-0" />
             <div className="absolute bottom-[-10%] left-[-10%] w-[65%] h-[65%] rounded-full bg-blue-400/10 dark:bg-blue-500/5 blur-[150px] pointer-events-none z-0" />
 
-            <Header title={getPageTitle()} />
+            <Header title={getPageTitle()} toggleSidebar={() => setIsSidebarOpen(prev => !prev)} />
 
             {/* Scrollable Page Outlet Content */}
             <main className="flex-1 overflow-y-auto p-6 md:p-8 z-10 relative">

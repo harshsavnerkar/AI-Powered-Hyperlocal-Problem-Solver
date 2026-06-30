@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import { useNotifications } from '../context/NotificationContext.jsx';
-import { Bell, Sun, Moon, Sparkles, LogOut, CheckCheck } from 'lucide-react';
+import { Bell, Sun, Moon, Sparkles, LogOut, CheckCheck, Menu } from 'lucide-react';
 
-const Header = ({ title }) => {
+const Header = ({ title, toggleSidebar }) => {
   const { user, logout } = useAuth();
   const { darkMode, toggleTheme } = useTheme();
   const { notifications, unreadCount, markAllAsRead } = useNotifications();
@@ -36,10 +36,16 @@ const Header = ({ title }) => {
   }[role];
 
   return (
-    <header className="h-20 border-b border-gray-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md px-8 flex items-center justify-between z-40 relative transition-colors duration-200">
-      {/* Title */}
-      <div>
-        <h1 className="font-extrabold text-2xl tracking-tight text-gray-900 dark:text-white capitalize font-sans">
+    <header className="h-20 border-b border-gray-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-md px-4 md:px-8 flex items-center justify-between z-40 relative transition-colors duration-200">
+      {/* Title & Hamburger */}
+      <div className="flex items-center gap-2.5 min-w-0">
+        <button 
+          onClick={toggleSidebar}
+          className="p-2 -ml-1 text-gray-500 hover:text-gray-700 dark:hover:text-white rounded-lg block md:hidden cursor-pointer shrink-0"
+        >
+          <Menu size={20} />
+        </button>
+        <h1 className="font-extrabold text-base md:text-2xl tracking-tight text-gray-900 dark:text-white capitalize font-sans truncate">
           {title}
         </h1>
       </div>

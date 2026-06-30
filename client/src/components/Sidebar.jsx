@@ -21,7 +21,7 @@ import {
   Sparkles
 } from 'lucide-react';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, setIsOpen }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -103,7 +103,7 @@ const Sidebar = () => {
   };
 
   return (
-    <aside className="w-64 border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-screen shrink-0 transition-colors duration-200">
+    <aside className={`fixed inset-y-0 left-0 z-50 w-64 border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col h-screen shrink-0 transition-all duration-350 ease-out md:translate-x-0 md:static ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
       {/* Sidebar Header / Logo */}
       <div className="p-5 border-b border-gray-100 dark:border-slate-850 flex items-center gap-3.5">
         <img src={appLogo} alt="CommunityHero Logo" className="h-9 w-auto rounded-lg shadow-sm border border-gray-105 dark:border-slate-800/85 shrink-0" />
