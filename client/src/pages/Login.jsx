@@ -127,11 +127,28 @@ const Login = () => {
         {/* Right split panel - Form */}
         <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-10">
           <div className="w-full max-w-md space-y-6">
+            {/* Logo on mobile/tablet */}
+            <div className="flex items-center gap-3.5 justify-center lg:hidden">
+              <img src={appLogo} alt="CommunityHero Logo" className="h-10 w-auto rounded-xl border border-emerald-500/25 shadow-sm shrink-0" />
+              <span className="font-black text-2xl tracking-tight text-gray-900 dark:text-white font-sans leading-none font-extrabold">
+                Community<span className="text-emerald-500">Hero</span>
+              </span>
+            </div>
+
+            {/* Compact Illustration on mobile/tablet */}
+            <div className="relative w-full rounded-2xl overflow-hidden block lg:hidden border border-emerald-500/10 bg-emerald-500/5 p-3 flex justify-center">
+              <img 
+                src={loginIllustration} 
+                alt="Community Hero Login Illustration" 
+                className="max-h-[160px] object-contain" 
+              />
+            </div>
+
             <div>
-              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white font-sans tracking-tight">
+              <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white font-sans tracking-tight text-center lg:text-left">
                 Welcome Back!
               </h2>
-              <p className="text-sm text-gray-500 dark:text-slate-400 mt-2 font-medium">
+              <p className="text-sm text-gray-500 dark:text-slate-400 mt-2 font-medium text-center lg:text-left">
                 Login to continue your journey
               </p>
             </div>
