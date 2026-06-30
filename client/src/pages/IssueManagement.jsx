@@ -168,110 +168,221 @@ const IssueManagement = () => {
         ) : filteredIssues.length === 0 ? (
           <div className="p-12 text-center text-xs text-gray-400 font-medium">No complaints match your search query.</div>
         ) : (
-          <table className="w-full text-left text-xs border-collapse min-w-[750px]">
-            <thead>
-              <tr className="border-b border-gray-100 dark:border-slate-800 text-gray-400 font-bold uppercase tracking-wider">
-                <th className="py-3 pr-4">Issue</th>
-                <th className="py-3 px-4">Location</th>
-                <th className="py-3 px-4">Priority</th>
-                <th className="py-3 px-4">Status</th>
-                <th className="py-3 px-4 text-center">Trust Score</th>
-                <th className="py-3 px-4">Assigned Team</th>
-                <th className="py-3 pl-4 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-slate-850">
-              {filteredIssues.map((issue) => (
-                <tr key={issue._id} className="hover:bg-gray-50/20 dark:hover:bg-slate-800/10">
-                  {/* Issue column */}
-                  <td className="py-4 pr-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 flex items-center justify-center text-lg shrink-0 overflow-hidden">
-                        {issue.media?.imageUrl ? (
-                          <img 
-                            src={issue.media.imageUrl.startsWith('http') ? issue.media.imageUrl : `${API_BASE_URL.replace('/api', '')}${issue.media.imageUrl}`} 
-                            alt="" 
-                            className="h-full w-full object-cover" 
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                              const emoji = 
-                                issue.category === 'Pothole' ? '🕳️' :
-                                issue.category === 'Garbage' ? '🗑️' :
-                                issue.category === 'Water Leakage' ? '💧' :
-                                issue.category === 'Streetlight' ? '💡' : '⚠️';
-                              const textNode = document.createTextNode(emoji);
-                              e.target.parentNode.appendChild(textNode);
+          <>
+            {/* Desktop view: table */}
+            <table className="hidden md:table w-full text-left text-xs border-collapse min-w-[750px]">
+              <thead>
+                <tr className="border-b border-gray-100 dark:border-slate-800 text-gray-400 font-bold uppercase tracking-wider">
+                  <th className="py-3 pr-4">Issue</th>
+                  <th className="py-3 px-4">Location</th>
+                  <th className="py-3 px-4">Priority</th>
+                  <th className="py-3 px-4">Status</th>
+                  <th className="py-3 px-4 text-center">Trust Score</th>
+                  <th className="py-3 px-4">Assigned Team</th>
+                  <th className="py-3 pl-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 dark:divide-slate-850">
+                {filteredIssues.map((issue) => (
+                  <tr key={issue._id} className="hover:bg-gray-50/20 dark:hover:bg-slate-800/10">
+                    {/* Issue column */}
+                    <td className="py-4 pr-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 flex items-center justify-center text-lg shrink-0 overflow-hidden">
+                          {issue.media?.imageUrl ? (
+                            <img 
+                              src={issue.media.imageUrl.startsWith('http') ? issue.media.imageUrl : `${API_BASE_URL.replace('/api', '')}${issue.media.imageUrl}`} 
+                              alt="" 
+                              className="h-full w-full object-cover" 
+                              onError={(e) => {
+                                e.target.style.display = 'none';
+                                const emoji = 
+                                  issue.category === 'Pothole' ? '🕳️' :
+                                  issue.category === 'Garbage' ? '🗑️' :
+                                  issue.category === 'Water Leakage' ? '💧' :
+                                  issue.category === 'Streetlight' ? '💡' : '⚠️';
+                                const textNode = document.createTextNode(emoji);
+                                e.target.parentNode.appendChild(textNode);
+                              }}
+                            />
+                          ) : (
+                            issue.category === 'Pothole' ? '🕳️' :
+                            issue.category === 'Garbage' ? '🗑️' :
+                            issue.category === 'Water Leakage' ? '💧' :
+                            issue.category === 'Streetlight' ? '💡' : '⚠️'
+                          )}
+                        </div>
+                        <div>
+                          <span className="block font-bold text-gray-900 dark:text-white leading-tight">{issue.title}</span>
+                          <span className="block text-[10px] text-gray-400 mt-0.5">{issue.category}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Location address */}
+                    <td className="py-4 px-4 text-gray-500 dark:text-slate-400 max-w-[150px] truncate">
+                      {issue.location?.address}
+                    </td>
+
+                    {/* Priority color badge */}
+                    <td className="py-4 px-4">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide ${priorityColors[issue.priority]}`}>
+                        {issue.priority}
+                      </span>
+                    </td>
+
+                    {/* Status tag */}
+                    <td className="py-4 px-4">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide ${statusColors[issue.status]}`}>
+                        {issue.status}
+                      </span>
+                    </td>
+
+                    {/* Trust Score */}
+                    <td className="py-4 px-4 text-center">
+                      <span className={`font-bold ${
+                        issue.trustScore >= 80 ? 'text-emerald-500' :
+                        issue.trustScore >= 50 ? 'text-yellow-500' : 'text-gray-400'
+                      }`}>{issue.trustScore}%</span>
+                    </td>
+
+                    {/* Assigned Team */}
+                    <td className="py-4 px-4 text-gray-600 dark:text-slate-355 font-medium">
+                      {assigningIssueId === issue._id ? (
+                        <div className="flex items-center gap-1.5 min-w-[200px]">
+                          <select
+                            value={assignedTeam}
+                            onChange={(e) => setAssignedTeam(e.target.value)}
+                            className="px-2 py-1 text-[10px] rounded border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none"
+                          >
+                            <option value="">Select Team</option>
+                            {teamsList.map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                          <button
+                            onClick={() => handleAssign(issue._id)}
+                            className="p-1 bg-emerald-600 text-white rounded hover:bg-emerald-700"
+                          >
+                            <Check size={12} />
+                          </button>
+                        </div>
+                      ) : (
+                        <span>{issue.assignedTeam || 'Unassigned'}</span>
+                      )}
+                    </td>
+
+                    {/* Actions Column */}
+                    <td className="py-4 pl-4 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        {/* Assign team trigger */}
+                        {issue.status !== 'Resolved' && (
+                          <button
+                            onClick={() => {
+                              setAssigningIssueId(issue._id);
+                              setAssignedTeam(issue.assignedTeam || '');
                             }}
-                          />
-                        ) : (
-                          issue.category === 'Pothole' ? '🕳️' :
-                          issue.category === 'Garbage' ? '🗑️' :
-                          issue.category === 'Water Leakage' ? '💧' :
-                          issue.category === 'Streetlight' ? '💡' : '⚠️'
+                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 hover:text-gray-600 dark:hover:text-white rounded-lg transition-colors cursor-pointer"
+                            title="Assign team"
+                          >
+                            <UserPlus size={14} />
+                          </button>
+                        )}
+
+                        {/* In Progress state trigger */}
+                        {issue.status === 'Assigned' && (
+                          <button
+                            onClick={() => handleStatusChange(issue._id, 'In Progress')}
+                            className="p-1.5 hover:bg-gray-100 dark:hover:bg-slate-800 text-gray-400 hover:text-gray-650 dark:hover:text-white rounded-lg transition-colors cursor-pointer"
+                            title="Mark In Progress"
+                          >
+                            <Edit size={14} />
+                          </button>
+                        )}
+
+                        {/* Resolve trigger */}
+                        {issue.status !== 'Resolved' && (
+                          <button
+                            onClick={() => handleStatusChange(issue._id, 'Resolved')}
+                            className="p-1.5 bg-teal-50 dark:bg-teal-950/20 text-teal-600 dark:text-teal-400 hover:bg-teal-100 dark:hover:bg-teal-950/40 rounded-lg transition-colors cursor-pointer"
+                            title="Mark Resolved"
+                          >
+                            <Check size={14} />
+                          </button>
                         )}
                       </div>
-                      <div>
-                        <span className="block font-bold text-gray-900 dark:text-white leading-tight">{issue.title}</span>
-                        <span className="block text-[10px] text-gray-400 mt-0.5">{issue.category}</span>
-                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Mobile view: list of cards */}
+            <div className="block md:hidden space-y-4">
+              {filteredIssues.map((issue) => (
+                <div key={issue._id} className="p-4 border border-gray-100 dark:border-slate-800/80 rounded-2xl space-y-3 bg-white/50 dark:bg-slate-900/30">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-gray-100 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 flex items-center justify-center text-lg shrink-0 overflow-hidden">
+                      {issue.media?.imageUrl ? (
+                        <img 
+                          src={issue.media.imageUrl.startsWith('http') ? issue.media.imageUrl : `${API_BASE_URL.replace('/api', '')}${issue.media.imageUrl}`} 
+                          alt="" 
+                          className="h-full w-full object-cover" 
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            const emoji = 
+                              issue.category === 'Pothole' ? '🕳️' :
+                              issue.category === 'Garbage' ? '🗑️' :
+                              issue.category === 'Water Leakage' ? '💧' :
+                              issue.category === 'Streetlight' ? '💡' : '⚠️';
+                            const textNode = document.createTextNode(emoji);
+                            e.target.parentNode.appendChild(textNode);
+                          }}
+                        />
+                      ) : (
+                        issue.category === 'Pothole' ? '🕳️' :
+                        issue.category === 'Garbage' ? '🗑️' :
+                        issue.category === 'Water Leakage' ? '💧' :
+                        issue.category === 'Streetlight' ? '💡' : '⚠️'
+                      )}
                     </div>
-                  </td>
+                    <div className="min-w-0 flex-1">
+                      <span className="block font-bold text-xs text-gray-900 dark:text-white leading-tight truncate">{issue.title}</span>
+                      <span className="block text-[10px] text-gray-400 mt-0.5">{issue.category}</span>
+                    </div>
+                  </div>
 
-                  {/* Location address */}
-                  <td className="py-4 px-4 text-gray-500 dark:text-slate-400 max-w-[150px] truncate">
-                    {issue.location?.address}
-                  </td>
+                  <div className="text-[11px] text-gray-500 space-y-1">
+                    <div><span className="font-semibold text-gray-400 uppercase text-[9px] tracking-wide">Location:</span> {issue.location?.address}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide ${priorityColors[issue.priority]}`}>{issue.priority}</span>
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wide ${statusColors[issue.status]}`}>{issue.status}</span>
+                      <span className="text-[10px] font-bold text-emerald-500 ml-auto">Trust: {issue.trustScore}%</span>
+                    </div>
+                  </div>
 
-                  {/* Priority color badge */}
-                  <td className="py-4 px-4">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide ${priorityColors[issue.priority]}`}>
-                      {issue.priority}
-                    </span>
-                  </td>
-
-                  {/* Status tag */}
-                  <td className="py-4 px-4">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide ${statusColors[issue.status]}`}>
-                      {issue.status}
-                    </span>
-                  </td>
-
-                  {/* Trust Score */}
-                  <td className="py-4 px-4 text-center">
-                    <span className={`font-bold ${
-                      issue.trustScore >= 80 ? 'text-emerald-500' :
-                      issue.trustScore >= 50 ? 'text-yellow-500' : 'text-gray-400'
-                    }`}>{issue.trustScore}%</span>
-                  </td>
-
-                  {/* Assigned Team */}
-                  <td className="py-4 px-4 text-gray-600 dark:text-slate-350 font-medium">
-                    {assigningIssueId === issue._id ? (
-                      <div className="flex items-center gap-1.5 min-w-[200px]">
-                        <select
-                          value={assignedTeam}
-                          onChange={(e) => setAssignedTeam(e.target.value)}
-                          className="px-2 py-1 text-[10px] rounded border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none"
-                        >
-                          <option value="">Select Team</option>
-                          {teamsList.map(t => <option key={t} value={t}>{t}</option>)}
-                        </select>
-                        <button
-                          onClick={() => handleAssign(issue._id)}
-                          className="p-1 bg-emerald-600 text-white rounded hover:bg-emerald-700"
-                        >
-                          <Check size={12} />
-                        </button>
-                      </div>
-                    ) : (
-                      <span>{issue.assignedTeam || 'Unassigned'}</span>
-                    )}
-                  </td>
-
-                  {/* Actions Column */}
-                  <td className="py-4 pl-4 text-right">
-                    <div className="flex items-center justify-end gap-1.5">
-                      {/* Assign team trigger */}
+                  <div className="pt-3 border-t border-gray-100 dark:border-slate-800/60 flex items-center justify-between gap-2">
+                    <div className="text-[11px] font-medium text-gray-600 dark:text-slate-355">
+                      {assigningIssueId === issue._id ? (
+                        <div className="flex items-center gap-1.5 min-w-[150px]">
+                          <select
+                            value={assignedTeam}
+                            onChange={(e) => setAssignedTeam(e.target.value)}
+                            className="px-2 py-1 text-[10px] rounded border border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-gray-900 dark:text-white focus:outline-none"
+                          >
+                            <option value="">Select Team</option>
+                            {teamsList.map(t => <option key={t} value={t}>{t}</option>)}
+                          </select>
+                          <button
+                            onClick={() => handleAssign(issue._id)}
+                            className="p-1 bg-emerald-600 text-white rounded hover:bg-emerald-700"
+                          >
+                            <Check size={12} />
+                          </button>
+                        </div>
+                      ) : (
+                        <span>Team: {issue.assignedTeam || 'Unassigned'}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1">
                       {issue.status !== 'Resolved' && (
                         <button
                           onClick={() => {
@@ -284,8 +395,6 @@ const IssueManagement = () => {
                           <UserPlus size={14} />
                         </button>
                       )}
-
-                      {/* In Progress state trigger */}
                       {issue.status === 'Assigned' && (
                         <button
                           onClick={() => handleStatusChange(issue._id, 'In Progress')}
@@ -295,8 +404,6 @@ const IssueManagement = () => {
                           <Edit size={14} />
                         </button>
                       )}
-
-                      {/* Resolve trigger */}
                       {issue.status !== 'Resolved' && (
                         <button
                           onClick={() => handleStatusChange(issue._id, 'Resolved')}
@@ -307,11 +414,11 @@ const IssueManagement = () => {
                         </button>
                       )}
                     </div>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          </>
         )}
       </div>
     </div>

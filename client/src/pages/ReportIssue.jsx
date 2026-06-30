@@ -38,7 +38,7 @@ const MapClickHandler = ({ onMapClick }) => {
 };
 
 const ReportIssue = () => {
-  const { token, user, updateUserPoints } = useAuth();
+  const { token, user, updateUser } = useAuth();
   const { darkMode } = useTheme();
   const { refreshNotifications } = useNotifications();
   const navigate = useNavigate();
@@ -175,8 +175,15 @@ const ReportIssue = () => {
         clearInterval(stepInterval);
         setAiStep(aiStepsList.length);
         
-        // Award points in Auth state
-        updateUserPoints(user.points + 10, user.badges);
+        // Fetch latest profile from server to get updated points and badges
+        fetch(`${API_BASE_URL}/auth/profile`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+        .then(res => res.json())
+        .then(profile => {
+          updateUser(profile);
+        })
+        .catch(err => console.error('Failed to sync profile after report:', err));
         
         // Trigger confetti burst
         confetti({
