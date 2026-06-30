@@ -120,13 +120,3 @@ AI-Powered-Hyperlocal-Problem-Solver/
    ```
 
 ---
-
-## 🔑 Seeded Testing Credentials
-
-Log in directly on the portal using these preset logins:
-
-| Role | Email | Password |
-|---|---|---|
-| **Citizen (Aarav Sharma)** | `aarav@civic.com` | `password123` |
-| **Volunteer (Rohan Mehta)** | `volunteer@civic.com` | `password123` |
-| **Admin (Admin Controller)** | `admin@civic.com` | `password123` |
