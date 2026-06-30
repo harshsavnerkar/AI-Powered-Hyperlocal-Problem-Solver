@@ -2,7 +2,20 @@
 
 **Community Hero** is a full-stack hyperlocal civic application designed to help citizens report, verify, track, and resolve local infrastructure issues like potholes, garbage piles, water leakages, streetlight failures, road damages, and safety hazards. 
 
-The application utilizes AI checks powered by the **Gemini API**, gamification systems (points, ranks, and unlockable badges), and Leaflet maps for geolocated hotspots and coordinate pin selections.
+The application utilizes AI checks powered by the **Google Gemini API**, gamification systems (points, ranks, and unlockable badges), and interactive Leaflet maps for geolocated hotspots and coordinate selections.
+
+---
+
+## 🛠️ Testing & Evaluation Accounts
+You can evaluate the dashboard roles directly using these pre-configured test profiles:
+
+| Role | Email | Password |
+|---|---|---|
+| **Citizen (Reporter)** | `harshsavnerkar@gmail.com` | `Harshks12` |
+| **Volunteer (Validator)** | `harshsavnerkar28@gmail.com` | `Harshks12` |
+| **Admin (Municipal Authority)** | `harshsavnerkar2428@gmail.com` | `Harshks12` |
+
+> 💡 **Developer Convenience Notice**: For testing convenience, registration options for **Admin** and **Volunteer** roles are currently enabled on the Sign-up screen. In production, these privileges will be restricted to authorized backend provisioning only.
 
 ---
 
@@ -21,10 +34,13 @@ The application utilizes AI checks powered by the **Gemini API**, gamification s
 * **Interactive Maps**:
   * Manual coordinate mapping pins.
   * Live cluster heatmaps highlighting emerging problem hubs.
-* **Gamification System**:
+* **Gamification & Impact Reports**:
   * Earn points for reporting (+10), verifying (+5), and final resolution (+20).
-  * Unlock premium badges (Community Reporter, Problem Solver, Active Citizen, City Guardian, Top Contributor).
-  * Real-time local notification bell updates.
+  * Unlock level badges (Community Reporter, Problem Solver, Active Citizen, City Guardian, Top Contributor).
+  * View and download certified achievements as high-resolution PNG cards.
+* **Mobile Responsiveness**:
+  * Sliding drawer menus with responsive hamburger toggles for a clean mobile viewport.
+  * Fallback placeholders to hide broken images (e.g. from Render's ephemeral container restarts) and display corresponding category emojis.
 
 ---
 
@@ -103,7 +119,6 @@ AI-Powered-Hyperlocal-Problem-Solver/
    ```bash
    npm start
    ```
-   *Note: On launch, the server automatically seeds three default test profiles.*
 
 ### Setup Frontend
 1. Navigate to the client folder in a new terminal:
@@ -118,5 +133,3 @@ AI-Powered-Hyperlocal-Problem-Solver/
    ```bash
    npm run dev
    ```
-
----
